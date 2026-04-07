@@ -141,14 +141,6 @@ const LandingPage = () => {
               >
                 Enter Feed <ArrowRight className="group-hover:translate-x-2 transition-transform" />
               </motion.button>
-
-              <div className="flex items-center justify-center gap-4 border-2 border-black bg-white p-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-                <QrCode size={50} />
-                <div className="text-left leading-none">
-                  <p className="text-[10px] font-black uppercase">App Beta</p>
-                  <p className="mt-1 text-[10px] font-bold text-black/40 uppercase">Scan to Join</p>
-                </div>
-              </div>
             </div>
           </motion.div>
 
