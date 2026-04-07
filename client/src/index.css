@@ -1,4 +1,6 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   color-scheme: dark;
@@ -30,6 +32,7 @@ body {
 }
 
 @keyframes pulse-live {
+
   0%,
   100% {
     opacity: 1;

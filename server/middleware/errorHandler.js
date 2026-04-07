@@ -38,6 +38,13 @@ const normalizeError = (error) => {
     };
   }
 
+  if (error.code === 11000) {
+    return {
+      statusCode: 409,
+      message: 'A record with one of those values already exists',
+    };
+  }
+
   return {
     statusCode: error.statusCode || error.status || 500,
     message: error.message || 'Internal server error',
