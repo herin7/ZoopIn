@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BarChart3, Boxes, LogOut, MessageSquareMore, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSocket } from '../hooks/useSocket';
@@ -60,7 +60,7 @@ const AdminDashboard = () => {
     );
   };
 
-  const fetchManagedSessions = async () => {
+  const fetchManagedSessions = useCallback(async () => {
     setIsLoadingSessions(true);
 
     try {
@@ -84,11 +84,11 @@ const AdminDashboard = () => {
     } finally {
       setIsLoadingSessions(false);
     }
-  };
+  }, [addToast, session]);
 
   useEffect(() => {
     fetchManagedSessions();
-  }, []);
+  }, [fetchManagedSessions]);
 
   useEffect(() => {
     if (!socket) {
@@ -229,11 +229,11 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 px-4 py-6 text-white md:px-6">
+    <div className="min-h-screen bg-black px-4 py-6 text-white md:px-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex flex-col gap-4 rounded-[2rem] border border-white/10 bg-gray-900/80 p-5 shadow-xl shadow-black/20 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">{roleLabel} control center</p>
+            <p className="text-sm font-bold uppercase tracking-widest text-brand-yellow">{roleLabel} control center</p>
             <h1 className="mt-2 text-3xl font-semibold">
               {user?.role === 'admin' ? 'Monitor and manage live commerce sessions' : 'Run your live product showcase'}
             </h1>
@@ -271,7 +271,7 @@ const AdminDashboard = () => {
                   }))
                 }
                 placeholder="Weekend sneaker drop"
-                className="w-full rounded-2xl border border-white/10 bg-gray-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400"
+                className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
               />
             </div>
 
@@ -287,7 +287,7 @@ const AdminDashboard = () => {
                   }))
                 }
                 placeholder="Tell buyers what you are showcasing in this stream."
-                className="w-full rounded-2xl border border-white/10 bg-gray-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400"
+                className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
               />
             </div>
 
@@ -302,7 +302,7 @@ const AdminDashboard = () => {
                   }))
                 }
                 placeholder="https://your-image-url.com/live-cover.jpg"
-                className="w-full rounded-2xl border border-white/10 bg-gray-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400"
+                className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
               />
             </div>
 
@@ -310,7 +310,7 @@ const AdminDashboard = () => {
               <button
                 type="submit"
                 disabled={isCreatingSession}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-gray-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-700"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-yellow px-5 py-3 text-sm font-bold text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-gray-700"
               >
                 <Plus size={16} />
                 {isCreatingSession ? 'Creating...' : 'Create session'}
@@ -321,7 +321,7 @@ const AdminDashboard = () => {
           <div className="rounded-[2rem] border border-white/10 bg-gray-900/70 p-4 shadow-lg shadow-black/20">
             <p className="text-xs uppercase tracking-[0.25em] text-gray-500">Signed in as</p>
             <p className="mt-2 text-lg font-semibold text-white">{user?.name || user?.email}</p>
-            <p className="mt-1 text-sm text-emerald-300">{roleLabel}</p>
+            <p className="mt-1 text-sm font-bold text-brand-yellow">{roleLabel}</p>
             <p className="mt-4 text-sm leading-6 text-gray-400">
               Add a thumbnail and a short description so buyers can browse your active room from the main storefront.
             </p>
@@ -361,8 +361,8 @@ const AdminDashboard = () => {
                 onClick={() => setSession(managedSession)}
                 className={`overflow-hidden rounded-[1.5rem] border text-left transition ${
                   session?._id === managedSession._id
-                    ? 'border-emerald-400/40 bg-emerald-500/10'
-                    : 'border-white/10 bg-gray-950/70 hover:border-white/20'
+                    ? 'border-brand-yellow/40 bg-brand-yellow/10'
+                    : 'border-white/10 bg-white/5 hover:border-white/20'
                 }`}
               >
                 <div className="aspect-[16/10] overflow-hidden bg-gray-900">
@@ -420,8 +420,8 @@ const AdminDashboard = () => {
                     onClick={() => setActiveTab(tab.id)}
                     className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
                       activeTab === tab.id
-                        ? 'bg-white text-gray-950'
-                        : 'border border-white/10 bg-gray-950/70 text-gray-300 hover:border-white/20 hover:text-white'
+                        ? 'bg-brand-yellow text-black'
+                        : 'border border-white/10 bg-black px-4 py-2 text-gray-300 hover:border-white/20 hover:text-white'
                     }`}
                   >
                     {tab.icon}

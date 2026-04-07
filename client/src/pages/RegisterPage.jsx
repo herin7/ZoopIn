@@ -99,10 +99,10 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-950 px-4 text-white">
-      <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-gray-900/90 shadow-2xl shadow-black/40 backdrop-blur-sm lg:grid lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="border-b border-white/10 bg-gray-950/70 p-8 lg:border-b-0 lg:border-r">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Create Account</p>
+    <div className="flex min-h-screen items-center justify-center bg-black px-4 text-white">
+      <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur-md lg:grid lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="border-b border-white/10 bg-black/40 p-8 lg:border-b-0 lg:border-r">
+          <p className="text-sm font-bold uppercase tracking-widest text-brand-yellow">Create Account</p>
           <h1 className="mt-3 text-3xl font-semibold">Choose how you want to use ZoopIn</h1>
           <p className="mt-3 text-sm text-gray-400">
             Buyers join live shopping rooms and discover products. Shop owners run streams and manage catalog launches.
@@ -116,11 +116,11 @@ const RegisterPage = () => {
                 onClick={() => handleRoleChange(roleOption.id)}
                 className={`flex w-full items-start gap-3 rounded-[1.5rem] border p-4 text-left transition ${
                   selectedRole === roleOption.id
-                    ? 'border-emerald-400/50 bg-emerald-500/10'
-                    : 'border-white/10 bg-gray-900/70 hover:border-white/20'
+                    ? 'border-brand-yellow/50 bg-brand-yellow/10'
+                    : 'border-white/10 bg-white/5 hover:border-white/20'
                 }`}
               >
-                <div className="rounded-2xl bg-white/5 p-3 text-emerald-300">{roleOption.icon}</div>
+                <div className="rounded-2xl bg-white/5 p-3 text-brand-yellow">{roleOption.icon}</div>
                 <div>
                   <p className="font-medium text-white">{roleOption.label}</p>
                   <p className="mt-1 text-sm text-gray-400">{roleOption.description}</p>
@@ -155,7 +155,7 @@ const RegisterPage = () => {
                     name: event.target.value,
                   }))
                 }
-                className="w-full rounded-2xl border border-white/10 bg-gray-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400"
+                className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
                 placeholder={selectedRole === 'shop_owner' ? 'Asha Sharma' : 'Riya Kapoor'}
               />
             </div>
@@ -172,7 +172,7 @@ const RegisterPage = () => {
                     email: event.target.value,
                   }))
                 }
-                className="w-full rounded-2xl border border-white/10 bg-gray-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400"
+                className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
                 placeholder="you@example.com"
               />
             </div>
@@ -191,7 +191,7 @@ const RegisterPage = () => {
                       password: event.target.value,
                     }))
                   }
-                  className="w-full rounded-2xl border border-white/10 bg-gray-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400"
+                  className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
                   placeholder="At least 6 characters"
                 />
               </div>
@@ -209,7 +209,7 @@ const RegisterPage = () => {
                       confirmPassword: event.target.value,
                     }))
                   }
-                  className="w-full rounded-2xl border border-white/10 bg-gray-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400"
+                  className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
                   placeholder="Repeat password"
                 />
               </div>
@@ -218,7 +218,7 @@ const RegisterPage = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-gray-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-700"
+              className="w-full rounded-2xl bg-brand-yellow px-4 py-3 text-sm font-bold text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-gray-700"
             >
               {isSubmitting ? 'Creating account...' : 'Create account'}
             </button>
@@ -226,7 +226,7 @@ const RegisterPage = () => {
 
           <p className="mt-6 text-sm text-gray-400">
             Already have an account?{' '}
-            <Link to={`/login?role=${selectedRole}`} className="font-medium text-emerald-300 hover:text-emerald-200">
+            <Link to={`/login?role=${selectedRole}`} className="font-bold text-brand-blue hover:text-brand-blue-hover">
               Sign in
             </Link>
           </p>

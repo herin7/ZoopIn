@@ -3,10 +3,10 @@ import { X } from 'lucide-react';
 import { useToastStore } from '../store/toastStore';
 
 const TONE_STYLES = {
-  info: 'border-sky-500/40 bg-sky-500/10 text-sky-100',
-  success: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100',
-  warning: 'border-amber-500/40 bg-amber-500/10 text-amber-100',
-  error: 'border-red-500/40 bg-red-500/10 text-red-100',
+  info: 'border-brand-blue/40 bg-white/5 text-brand-blue',
+  success: 'border-brand-blue/40 bg-white/5 text-brand-blue',
+  warning: 'border-brand-yellow/40 bg-white/5 text-brand-yellow',
+  error: 'border-red-500/40 bg-white/5 text-red-100',
 };
 
 const ToastContainer = () => {

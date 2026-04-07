@@ -26,7 +26,7 @@ const AnalyticsDashboard = ({ socket, sessionId, reactionCounts }) => {
       try {
         const response = await api.get(`/api/analytics/${sessionId}`);
         setInitialSnapshots(response.data.data.timeseries || []);
-      } catch (error) {
+      } catch {
         setInitialSnapshots([]);
       }
     };
@@ -51,7 +51,7 @@ const AnalyticsDashboard = ({ socket, sessionId, reactionCounts }) => {
       return entries;
     }, []);
 
-    return uniqueEntries.slice(-30).map(({ key, ...entry }) => ({
+    return uniqueEntries.slice(-30).map(({ ...entry }) => ({
       ...entry,
       label: new Date(entry.timestamp).toLocaleTimeString([], {
         hour: '2-digit',
@@ -97,11 +97,11 @@ const AnalyticsDashboard = ({ socket, sessionId, reactionCounts }) => {
         ].map((card) => (
           <div
             key={card.title}
-            className="rounded-[1.75rem] border border-white/10 bg-gray-950/70 p-4 shadow-lg shadow-black/20"
+            className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg backdrop-blur-md"
           >
             <div className="flex items-center justify-between">
               <p className="text-sm text-gray-400">{card.title}</p>
-              <div className="rounded-2xl bg-white/5 p-2 text-emerald-300">{card.icon}</div>
+              <div className="rounded-2xl bg-white/5 p-2 text-brand-yellow">{card.icon}</div>
             </div>
             <p className="mt-4 text-3xl font-semibold text-white">{card.value}</p>
             <p className="mt-2 text-xs uppercase tracking-[0.2em] text-gray-500">{card.subtitle}</p>
@@ -109,9 +109,9 @@ const AnalyticsDashboard = ({ socket, sessionId, reactionCounts }) => {
         ))}
       </div>
 
-      <div className="rounded-[1.75rem] border border-white/10 bg-gray-950/70 p-4">
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
         <div className="flex items-center gap-3">
-          <div className="rounded-2xl bg-sky-500/10 p-2 text-sky-300">
+          <div className="rounded-2xl bg-brand-blue/10 p-2 text-brand-blue">
             <Users size={18} />
           </div>
           <div>
@@ -122,7 +122,7 @@ const AnalyticsDashboard = ({ socket, sessionId, reactionCounts }) => {
 
         <div className="mt-5 h-72">
           {mergedData.length === 0 ? (
-            <div className="flex h-full items-center justify-center rounded-[1.5rem] border border-dashed border-white/10 bg-gray-900/60 text-sm text-gray-500">
+            <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-white/10 bg-black/40 text-sm text-gray-500">
               Analytics will appear after viewers start joining the room.
             </div>
           ) : (
@@ -139,14 +139,14 @@ const AnalyticsDashboard = ({ socket, sessionId, reactionCounts }) => {
                     color: '#f9fafb',
                   }}
                 />
-                <Line type="monotone" dataKey="viewerCount" stroke="#34d399" strokeWidth={3} dot={false} />
+                <Line type="monotone" dataKey="viewerCount" stroke="#FFD400" strokeWidth={3} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           )}
         </div>
       </div>
 
-      <div className="rounded-[1.75rem] border border-white/10 bg-gray-950/70 p-4">
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
         <div className="flex items-center gap-3">
           <div className="rounded-2xl bg-pink-500/10 p-2 text-pink-300">
             <Heart size={18} />
@@ -171,7 +171,7 @@ const AnalyticsDashboard = ({ socket, sessionId, reactionCounts }) => {
                 </div>
                 <div className="mt-2 h-2 rounded-full bg-white/5">
                   <div
-                    className="h-2 rounded-full bg-gradient-to-r from-emerald-400 to-sky-400"
+                    className="h-2 rounded-full bg-gradient-to-r from-brand-yellow to-brand-blue"
                     style={{ width: `${percentage}%` }}
                   />
                 </div>

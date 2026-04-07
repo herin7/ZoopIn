@@ -60,12 +60,12 @@ const BuyerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 px-4 py-6 text-white md:px-6">
+    <div className="min-h-screen bg-black px-4 py-6 text-white md:px-6">
       <div className="mx-auto max-w-7xl">
-        <div className="rounded-[2rem] border border-white/10 bg-gray-900/80 p-5 shadow-xl shadow-black/20">
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-xl backdrop-blur-md">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Buyer hub</p>
+              <p className="text-sm font-bold uppercase tracking-widest text-brand-yellow">Buyer hub</p>
               <h1 className="mt-2 text-3xl font-semibold">Welcome back, {user?.name || 'shopper'}</h1>
               <p className="mt-2 max-w-2xl text-sm text-gray-400">
                 Browse every active room, open the live stream, react instantly, and ask questions while the seller is presenting.
@@ -76,14 +76,14 @@ const BuyerDashboard = () => {
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-white/20 hover:bg-white/5"
+                className="rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-white transition hover:border-white/20 hover:bg-white/5"
               >
                 Explore landing page
               </button>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-950 transition hover:bg-gray-200"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-yellow px-4 py-2 text-sm font-bold text-black transition hover:brightness-110"
               >
                 <LogOut size={16} />
                 Sign out
@@ -93,7 +93,7 @@ const BuyerDashboard = () => {
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="rounded-[2rem] border border-white/10 bg-gray-900/75 p-6 shadow-lg shadow-black/20">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur-md">
             <p className="text-xs uppercase tracking-[0.35em] text-gray-500">How to use</p>
             <h2 className="mt-3 text-3xl font-semibold">Shop from the live rooms list</h2>
 
@@ -112,7 +112,7 @@ const BuyerDashboard = () => {
                   description: 'Watch the product spotlight update live as the seller switches featured items.',
                 },
               ].map((step) => (
-                <div key={step.title} className="rounded-[1.5rem] border border-white/10 bg-gray-950/70 p-4">
+                <div key={step.title} className="rounded-2xl border border-white/10 bg-black/40 p-4">
                   <p className="font-medium text-white">{step.title}</p>
                   <p className="mt-2 text-sm text-gray-400">{step.description}</p>
                 </div>
@@ -120,7 +120,7 @@ const BuyerDashboard = () => {
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-gray-900/75 p-6 shadow-lg shadow-black/20">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur-md">
             <p className="text-xs uppercase tracking-[0.35em] text-gray-500">Live marketplace</p>
             <h2 className="mt-2 text-2xl font-semibold">Your shopping snapshot</h2>
 
@@ -130,7 +130,7 @@ const BuyerDashboard = () => {
                 { label: 'Live viewers', value: liveViewerCount },
                 { label: 'Active products', value: products.length },
               ].map((stat) => (
-                <div key={stat.label} className="rounded-[1.5rem] border border-white/10 bg-gray-950/70 p-4">
+                <div key={stat.label} className="rounded-2xl border border-white/10 bg-black/40 p-4">
                   <p className="text-xs uppercase tracking-[0.25em] text-gray-500">{stat.label}</p>
                   <p className="mt-3 text-3xl font-semibold text-white">{stat.value}</p>
                 </div>
@@ -204,7 +204,7 @@ const BuyerDashboard = () => {
             {products.map((product) => (
               <div
                 key={product._id}
-                className="rounded-[1.75rem] border border-white/10 bg-gray-900/70 p-4 shadow-lg shadow-black/20"
+                className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-lg backdrop-blur-md"
               >
                 <div className="aspect-square overflow-hidden rounded-[1.25rem] bg-gray-950">
                   {product.images?.[0] ? (
@@ -215,7 +215,7 @@ const BuyerDashboard = () => {
                 </div>
                 <div className="mt-4">
                   <p className="text-sm font-semibold text-white">{product.name}</p>
-                  <p className="mt-2 text-lg font-semibold text-emerald-300">Rs. {Number(product.price || 0).toFixed(2)}</p>
+                  <p className="mt-2 text-lg font-bold text-brand-blue">Rs. {Number(product.price || 0).toFixed(2)}</p>
                   <p className="mt-2 line-clamp-3 text-sm text-gray-400">
                     {product.description || 'No description added yet.'}
                   </p>

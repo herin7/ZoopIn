@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ImagePlus, LoaderCircle, Sparkles, UploadCloud } from 'lucide-react';
 import api from '../../lib/api';
 import { useToastStore } from '../../store/toastStore';
@@ -26,7 +26,7 @@ const ProductManager = ({ session, socket, currentProductId, onCurrentProductCha
     [currentProductId, products]
   );
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setIsLoading(true);
 
     try {
@@ -41,11 +41,11 @@ const ProductManager = ({ session, socket, currentProductId, onCurrentProductCha
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [addToast]);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
   const handleCreateProduct = async (event) => {
     event.preventDefault();
@@ -110,16 +110,16 @@ const ProductManager = ({ session, socket, currentProductId, onCurrentProductCha
 
   return (
     <div className="space-y-5">
-      <div className="rounded-[1.75rem] border border-white/10 bg-gray-950/70 p-4">
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Current Spotlight</p>
+            <p className="text-sm font-bold uppercase tracking-widest text-brand-yellow">Current Spotlight</p>
             <h3 className="mt-2 text-lg font-semibold text-white">
               {currentProduct?.name || 'No product is live yet'}
             </h3>
           </div>
           {currentProduct && (
-            <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200">
+            <div className="rounded-full border border-brand-yellow/30 bg-brand-yellow/10 px-3 py-1 text-xs text-brand-yellow">
               Live product
             </div>
           )}
@@ -129,9 +129,9 @@ const ProductManager = ({ session, socket, currentProductId, onCurrentProductCha
         )}
       </div>
 
-      <div className="rounded-[1.75rem] border border-white/10 bg-gray-950/70 p-4">
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
         <div className="flex items-center gap-3">
-          <div className="rounded-2xl bg-sky-500/10 p-2 text-sky-300">
+          <div className="rounded-2xl bg-brand-blue/10 p-2 text-brand-blue">
             <ImagePlus size={18} />
           </div>
           <div>
@@ -179,7 +179,7 @@ const ProductManager = ({ session, socket, currentProductId, onCurrentProductCha
             onChange={(event) => setFormValues((state) => ({ ...state, description: event.target.value }))}
             placeholder="Description"
             rows={3}
-            className="w-full rounded-2xl border border-white/10 bg-gray-900 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-400"
+            className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-brand-blue"
           />
 
           <div
@@ -196,8 +196,8 @@ const ProductManager = ({ session, socket, currentProductId, onCurrentProductCha
                 setSelectedFile(file);
               }
             }}
-            className={`rounded-[1.5rem] border border-dashed px-4 py-8 text-center transition ${
-              isDragging ? 'border-sky-400 bg-sky-500/10' : 'border-white/10 bg-gray-900/80'
+            className={`rounded-2xl border border-dashed px-4 py-8 text-center transition ${
+              isDragging ? 'border-brand-blue bg-brand-blue/10' : 'border-white/10 bg-black/40'
             }`}
           >
             <UploadCloud className="mx-auto text-gray-500" size={26} />
@@ -206,7 +206,7 @@ const ProductManager = ({ session, socket, currentProductId, onCurrentProductCha
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="font-semibold text-sky-300"
+                className="font-bold text-brand-blue"
               >
                 browse files
               </button>
@@ -226,14 +226,14 @@ const ProductManager = ({ session, socket, currentProductId, onCurrentProductCha
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-2xl bg-sky-500 px-4 py-3 text-sm font-semibold text-gray-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-sky-700"
+            className="w-full rounded-2xl bg-brand-blue px-4 py-3 text-sm font-bold text-white transition hover:bg-brand-blue-hover disabled:cursor-not-allowed disabled:bg-gray-700"
           >
             {isSubmitting ? 'Saving product...' : 'Add Product'}
           </button>
         </form>
       </div>
 
-      <div className="rounded-[1.75rem] border border-white/10 bg-gray-950/70 p-4">
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h3 className="text-lg font-semibold text-white">Uploaded Products</h3>
@@ -267,8 +267,8 @@ const ProductManager = ({ session, socket, currentProductId, onCurrentProductCha
               key={product._id}
               className={`flex items-center gap-3 rounded-2xl border p-3 transition ${
                 currentProductId === product._id
-                  ? 'border-emerald-500/50 bg-emerald-500/10'
-                  : 'border-white/10 bg-gray-900/80'
+                  ? 'border-brand-yellow/50 bg-brand-yellow/10'
+                  : 'border-white/10 bg-black/40'
               }`}
             >
               <div className="h-16 w-16 overflow-hidden rounded-2xl bg-gray-800">
@@ -283,7 +283,7 @@ const ProductManager = ({ session, socket, currentProductId, onCurrentProductCha
 
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-white">{product.name}</p>
-                <p className="text-sm text-sky-300">₹{Number(product.price || 0).toFixed(2)}</p>
+                <p className="text-sm font-bold text-brand-blue">₹{Number(product.price || 0).toFixed(2)}</p>
               </div>
 
               <button

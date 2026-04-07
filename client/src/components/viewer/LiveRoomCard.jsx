@@ -23,12 +23,12 @@ const LiveRoomCard = ({ session, onOpen }) => {
     'Join the live room to see the current showcase, ask questions, and react in real time.';
 
   return (
-    <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-900/75 shadow-xl shadow-black/20">
+    <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur-md">
       <div className="relative aspect-[16/10] overflow-hidden bg-gray-950">
         {sessionImage ? (
           <img src={sessionImage} alt={session.title} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-emerald-500/20 via-gray-950 to-sky-500/10 text-sm text-gray-400">
+          <div className="flex h-full items-center justify-center bg-gradient-to-br from-brand-yellow/15 via-black to-brand-blue/10 text-sm text-gray-400">
             Thumbnail coming soon
           </div>
         )}
@@ -42,7 +42,7 @@ const LiveRoomCard = ({ session, onOpen }) => {
           {session?.viewerCount || 0}
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-emerald-200/90">
+          <p className="text-xs font-bold uppercase tracking-widest text-brand-yellow">
             Hosted by {getHostLabel(session)}
           </p>
           <h3 className="mt-2 text-xl font-semibold text-white">{session?.title}</h3>
@@ -52,7 +52,7 @@ const LiveRoomCard = ({ session, onOpen }) => {
       <div className="space-y-4 p-4">
         <p className="line-clamp-3 text-sm leading-6 text-gray-300">{sessionDescription}</p>
 
-        <div className="rounded-[1.25rem] border border-white/10 bg-gray-950/70 p-3">
+        <div className="rounded-2xl border border-white/10 bg-black/40 p-3">
           <p className="text-xs uppercase tracking-[0.22em] text-gray-500">Now featuring</p>
           <p className="mt-2 text-sm font-medium text-white">
             {session?.currentProduct?.name || 'The host is preparing the next product'}
@@ -62,7 +62,7 @@ const LiveRoomCard = ({ session, onOpen }) => {
         <button
           type="button"
           onClick={() => onOpen?.(session?.roomId)}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-3 text-sm font-semibold text-gray-950 transition hover:bg-emerald-400"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-yellow px-4 py-3 text-sm font-bold text-black transition hover:brightness-110"
         >
           <PlayCircle size={16} />
           Watch live

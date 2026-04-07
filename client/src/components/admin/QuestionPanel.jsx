@@ -8,18 +8,18 @@ const QuestionPanel = ({ questions, unansweredCount, onMarkAnswered }) => {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[1.75rem] border border-white/10 bg-gray-950/70 p-4">
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="rounded-2xl bg-amber-500/10 p-2 text-amber-300">
+            <div className="rounded-2xl bg-brand-yellow/15 p-2 text-brand-yellow">
               <MessageSquareMore size={18} />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white">Viewer Questions</h3>
-              <p className="text-sm text-gray-500">Keep up with incoming questions as they arrive in real time.</p>
+              <h3 className="text-lg font-bold text-white">Viewer Questions</h3>
+              <p className="text-sm text-gray-400">Keep up with incoming questions as they arrive in real time.</p>
             </div>
           </div>
-          <div className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs text-amber-200">
+          <div className="rounded-full border border-brand-yellow/30 bg-brand-yellow/10 px-3 py-1 text-xs text-brand-yellow">
             {unansweredCount} unanswered
           </div>
         </div>
@@ -27,7 +27,7 @@ const QuestionPanel = ({ questions, unansweredCount, onMarkAnswered }) => {
 
       <div className="space-y-3">
         {sortedQuestions.length === 0 && (
-          <div className="rounded-[1.75rem] border border-white/10 bg-gray-950/70 p-8 text-center text-sm text-gray-500">
+          <div className="rounded-2xl border border-white/10 bg-black/40 p-8 text-center text-sm text-gray-500">
             No questions yet. Once viewers start asking, they will appear here automatically.
           </div>
         )}
@@ -35,10 +35,10 @@ const QuestionPanel = ({ questions, unansweredCount, onMarkAnswered }) => {
         {sortedQuestions.map((question) => (
           <div
             key={question._id || `${question.viewerName}-${question.timestamp}`}
-            className={`rounded-[1.5rem] border bg-gray-950/70 p-4 transition ${
+            className={`rounded-2xl border bg-black/40 p-4 transition ${
               question.isAnswered
                 ? 'border-white/10 opacity-60'
-                : 'border-amber-500/20 border-l-4 border-l-amber-400'
+                : 'border-brand-yellow/20 border-l-4 border-l-brand-yellow'
             }`}
           >
             <div className="flex items-start justify-between gap-3">
@@ -55,7 +55,7 @@ const QuestionPanel = ({ questions, unansweredCount, onMarkAnswered }) => {
               </div>
 
               {question.isAnswered ? (
-                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200">
+                <div className="inline-flex items-center gap-2 rounded-full bg-brand-blue/10 px-3 py-1 text-xs font-bold text-brand-blue">
                   <CheckCheck size={14} />
                   Answered
                 </div>
@@ -63,7 +63,7 @@ const QuestionPanel = ({ questions, unansweredCount, onMarkAnswered }) => {
                 <button
                   type="button"
                   onClick={() => onMarkAnswered(question)}
-                  className="rounded-full bg-amber-400 px-3 py-1.5 text-xs font-semibold text-gray-950 transition hover:bg-amber-300"
+                  className="rounded-full bg-brand-yellow px-3 py-1.5 text-xs font-bold text-black transition hover:brightness-110"
                 >
                   Mark Answered
                 </button>

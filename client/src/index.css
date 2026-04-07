@@ -2,51 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── ZoopIn Design System ── */
+
 :root {
-  color-scheme: dark;
+  --brand-yellow: #FFD400;
+  --brand-black: #000000;
+  --brand-blue: #3264FF;
+  --brand-blue-hover: #2D5AE5;
+  --text-primary: #000000;
+  --text-secondary: #6B7280;
+  --border-color: #E5E7EB;
+  font-family: system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
 body {
-  background: #030712;
-  color: #f9fafb;
+  margin: 0;
+  background: #000000;
+  color: #ffffff;
 }
 
 #root {
   min-height: 100vh;
 }
 
-@keyframes float-emoji {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0) scale(0.9);
-  }
+/* ── Snap-scroll feed (Instagram Reels style) ── */
 
-  10% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate3d(0, -200px, 0) scale(1.25);
-  }
+.feed-scroll {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
 
-@keyframes pulse-live {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.35;
-  }
+.feed-scroll::-webkit-scrollbar {
+  display: none;
 }
 
-.animate-float-emoji {
-  animation: float-emoji 2s ease-out forwards;
+.feed-slide {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
-.animate-pulse-live {
-  animation: pulse-live 1.2s ease-in-out infinite;
+/* ── Custom utilities ── */
+
+.text-shadow-sm {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.text-shadow-md {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Gradient overlays ── */
+
+.gradient-feed-top {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 40%);
+}
+
+.gradient-feed-bottom {
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 70%);
 }

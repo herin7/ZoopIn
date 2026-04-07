@@ -3,6 +3,7 @@ import AdminRoute from './components/AdminRoute';
 import AdminDashboard from './pages/AdminDashboard';
 import BuyerDashboard from './pages/BuyerDashboard';
 import LandingPage from './pages/LandingPage';
+import LiveFeed from './pages/LiveFeed';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ViewerRoom from './pages/ViewerRoom';
@@ -12,6 +13,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/feed" element={<LiveFeed />} />
         <Route
           path="/buyer"
           element={

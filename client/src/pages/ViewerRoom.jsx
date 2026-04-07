@@ -200,7 +200,7 @@ const ViewerRoom = () => {
               <span className="h-2 w-2 rounded-full bg-red-400 animate-pulse-live" />
               Live
             </span>
-            <Eye size={15} className="text-emerald-300" />
+            <Eye size={15} className="text-brand-yellow" />
             <span>{viewerCount}</span>
           </div>
         </div>
@@ -222,7 +222,7 @@ const ViewerRoom = () => {
 
           {hasStreamEnded && (
             <div className="max-w-md rounded-[1.75rem] bg-black/70 p-6 text-center backdrop-blur-sm">
-              <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">Session ended</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-brand-yellow/80">Session ended</p>
               <h2 className="mt-3 text-2xl font-semibold">Thanks for watching</h2>
               <div className="mt-5 rounded-[1.25rem] border border-white/10 bg-white/5 p-4 text-left text-sm text-gray-300">
                 <p>Session: {session?.title || 'Live session'}</p>
@@ -237,7 +237,7 @@ const ViewerRoom = () => {
         {hasConnectedOnce && !isConnected && !hasStreamEnded && (
           <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/35 backdrop-blur-sm">
             <div className="rounded-full bg-black/70 px-5 py-3 text-sm text-white">
-              <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-emerald-400" />
+              <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-brand-yellow" />
               Reconnecting...
             </div>
           </div>
@@ -249,7 +249,7 @@ const ViewerRoom = () => {
               key={reaction.type}
               type="button"
               onClick={(event) => handleSendReaction(reaction.type, event)}
-              className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm transition hover:scale-105 hover:bg-black/70"
+              className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm transition hover:scale-110 hover:bg-brand-yellow hover:text-black"
             >
               {reaction.icon}
             </button>

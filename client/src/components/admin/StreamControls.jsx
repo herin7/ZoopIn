@@ -118,10 +118,10 @@ const StreamControls = ({ session, socket, localStream, startStream, stopStream,
   };
 
   return (
-    <div className="relative flex h-full flex-col rounded-[2rem] border border-white/10 bg-gray-900 p-5 shadow-2xl shadow-black/30">
+    <div className="relative flex h-full flex-col rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur-md">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Live Control Room</p>
+          <p className="text-sm font-bold uppercase tracking-widest text-brand-yellow">Live Control Room</p>
           <h2 className="mt-2 text-2xl font-semibold text-white">
             {session?.title || 'Create a session to begin'}
           </h2>
@@ -134,7 +134,7 @@ const StreamControls = ({ session, socket, localStream, startStream, stopStream,
         </div>
       </div>
 
-      <div className="relative mt-5 flex min-h-[320px] flex-1 items-center justify-center overflow-hidden rounded-[1.75rem] border border-white/10 bg-gray-950">
+      <div className="relative mt-5 flex min-h-[320px] flex-1 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black">
         {localStream ? (
           <video ref={videoRef} autoPlay muted playsInline className="h-full w-full object-cover" />
         ) : (
@@ -156,8 +156,8 @@ const StreamControls = ({ session, socket, localStream, startStream, stopStream,
             disabled={!localStream}
             className={`rounded-full border px-4 py-3 transition ${
               isCameraEnabled
-                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
-                : 'border-white/10 bg-gray-950 text-gray-400'
+              ? 'border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow'
+                : 'border-white/10 bg-black text-gray-400'
             } disabled:cursor-not-allowed disabled:opacity-50`}
           >
             {isCameraEnabled ? <Camera size={18} /> : <VideoOff size={18} />}
@@ -168,8 +168,8 @@ const StreamControls = ({ session, socket, localStream, startStream, stopStream,
             disabled={!localStream}
             className={`rounded-full border px-4 py-3 transition ${
               isMicEnabled
-                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
-                : 'border-white/10 bg-gray-950 text-gray-400'
+              ? 'border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow'
+                : 'border-white/10 bg-black text-gray-400'
             } disabled:cursor-not-allowed disabled:opacity-50`}
           >
             {isMicEnabled ? <Mic size={18} /> : <MicOff size={18} />}
@@ -181,7 +181,7 @@ const StreamControls = ({ session, socket, localStream, startStream, stopStream,
             type="button"
             disabled={!session || isStarting || isLive}
             onClick={goLive}
-            className="rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-gray-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-700"
+            className="rounded-full bg-brand-yellow px-5 py-3 text-sm font-bold text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-gray-700"
           >
             {isStarting ? 'Starting...' : 'Go Live'}
           </button>
@@ -189,7 +189,7 @@ const StreamControls = ({ session, socket, localStream, startStream, stopStream,
             type="button"
             disabled={!session || !isLive || isEnding}
             onClick={() => setIsEndModalOpen(true)}
-            className="rounded-full bg-red-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:bg-red-900"
+            className="rounded-full bg-red-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-red-900"
           >
             {isEnding ? 'Ending...' : 'End Stream'}
           </button>
