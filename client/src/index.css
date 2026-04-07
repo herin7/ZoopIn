@@ -1,0 +1,49 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: #030712;
+  color: #f9fafb;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@keyframes float-emoji {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.9);
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -200px, 0) scale(1.25);
+  }
+}
+
+@keyframes pulse-live {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.animate-float-emoji {
+  animation: float-emoji 2s ease-out forwards;
+}
+
+.animate-pulse-live {
+  animation: pulse-live 1.2s ease-in-out infinite;
+}

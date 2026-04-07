@@ -1,0 +1,23 @@
+{
+  "name": "live-commerce-monorepo",
+  "version": "1.0.0",
+  "description": "Live Commerce Platform Monorepo",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "npm start --prefix server",
+    "client": "npm run dev --prefix client",
+    "install-all": "npm install && npm install --prefix server && npm install --prefix client"
+  },
+  "keywords": [],
+  "author": "Herin Soni",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "cloudinary": "^2.9.0",
+    "multer": "^2.1.1",
+    "uuid": "^13.0.0"
+  }
+}
