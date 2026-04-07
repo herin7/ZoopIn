@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Eye, Flame, Heart, MessageCirclePlus, Sparkles, ThumbsUp } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Eye, Flame, Heart, MessageCirclePlus, Sparkles, ThumbsUp, Zap, Radio, ChevronLeft, ShoppingCart } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket } from '../hooks/useSocket';
 import { useWebRTCViewer } from '../hooks/useWebRTCViewer';
 import { useReactions } from '../hooks/useReactions';
@@ -11,16 +12,17 @@ import ProductSpotlight from '../components/viewer/ProductSpotlight';
 import QuestionDrawer from '../components/viewer/QuestionDrawer';
 
 const REACTION_BUTTONS = [
-  { type: 'like', icon: <ThumbsUp size={18} /> },
-  { type: 'fire', icon: <Flame size={18} /> },
-  { type: 'heart', icon: <Heart size={18} /> },
-  { type: 'wow', icon: <Sparkles size={18} /> },
+  { type: 'like', icon: <ThumbsUp size={22} />, color: 'bg-zoop-yellow', label: 'Hype' },
+  { type: 'fire', icon: <Flame size={22} />, color: 'bg-red-600', label: 'Fire' },
+  { type: 'heart', icon: <Heart size={22} />, color: 'bg-pink-500', label: 'Love' },
+  { type: 'wow', icon: <Sparkles size={22} />, color: 'bg-blue-600', label: 'Wow' },
 ];
 
 const VIEWER_NAME_KEY = 'viewer-name';
 
 const ViewerRoom = () => {
   const { roomId } = useParams();
+  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const addToast = useToastStore((state) => state.addToast);
   const [session, setSession] = useState(null);
@@ -95,7 +97,7 @@ const ViewerRoom = () => {
       );
 
       addToast({
-        title: 'Product has changed',
+        title: 'Product Drop!',
         message: currentProduct?.name || 'A new item is now featured.',
         tone: 'success',
       });
@@ -165,118 +167,205 @@ const ViewerRoom = () => {
     setQuestionText('');
     setIsQuestionDrawerOpen(false);
     addToast({
-      title: 'Question submitted',
-      message: 'The host will see it in the live control room.',
+      title: 'Hype Question Sent!',
+      message: 'The host will see it in the drop center.',
       tone: 'success',
     });
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black text-white">
-      <div className="absolute inset-0 bg-black">
+    <div className="relative min-h-screen overflow-hidden bg-white text-black selection:bg-black selection:text-white font-sans">
+      
+      {/* ── Background Video layer ── */}
+      <div className="absolute inset-0 bg-black z-0">
         {remoteStream ? (
-          <video ref={videoRef} autoPlay playsInline className="h-full w-full object-cover" />
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="h-full w-full object-cover transition-all duration-700"
+          />
         ) : (
-          <div className="flex h-full items-center justify-center bg-gray-950">
-            <div className="h-[42vh] w-[84vw] max-w-4xl rounded-[2rem] border border-white/10 bg-gray-900" />
+          <div className="flex h-full items-center justify-center">
+             <Radio size={80} className="text-white opacity-10 animate-pulse" />
           </div>
         )}
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/75" />
+      {/* ── Overlays: Brutalist Gradients ── */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none z-10" />
 
+      {/* ── Floating emoji layer ── */}
       {animatingReactions.map((reaction) => (
         <FloatingEmoji key={reaction.id} emoji={reaction.emoji} x={reaction.x} y={reaction.y} />
       ))}
 
-      <div className="relative z-20 flex min-h-screen flex-col justify-between px-4 py-4 sm:px-6">
-        <div className="flex items-start justify-between gap-3">
-          <div className="max-w-[70%] rounded-full bg-black/55 px-4 py-2 text-sm backdrop-blur-sm">
-            {session?.title || 'Live session'}
-          </div>
+      {/* ── Top Nav: Hype Centric ── */}
+      <div className="relative z-30 flex items-center justify-between p-6">
+        <motion.button
+          whileHover={{ x: -2 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 bg-white border-[3px] border-black px-4 py-2 font-black uppercase italic text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-zoop-yellow transition-all pointer-events-auto"
+        >
+          <ChevronLeft size={16} strokeWidth={3} /> Exit Drop
+        </motion.button>
 
-          <div className="flex items-center gap-2 rounded-full bg-black/55 px-4 py-2 text-sm backdrop-blur-sm">
-            <span className="inline-flex items-center gap-2 rounded-full bg-red-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-red-200">
-              <span className="h-2 w-2 rounded-full bg-red-400 animate-pulse-live" />
-              Live
-            </span>
-            <Eye size={15} className="text-brand-yellow" />
-            <span>{viewerCount}</span>
-          </div>
+        <div className="flex items-center gap-4">
+           <div className="bg-red-600 border-[3px] border-black px-4 py-2 flex items-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <span className="h-2 w-2 rounded-full bg-white animate-ping" />
+              <span className="text-xs font-black uppercase italic text-white tracking-widest">LIVE SIGNAL</span>
+           </div>
+           <div className="bg-white border-[3px] border-black px-4 py-2 flex items-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <Eye size={16} strokeWidth={3} />
+              <span className="text-xs font-black uppercase italic tracking-tighter">{viewerCount} Watching</span>
+           </div>
         </div>
+      </div>
 
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
+      {/* ── Center Information / Loading States ── */}
+      <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-8">
+        <AnimatePresence mode="wait">
           {isLoading && (
-            <div className="rounded-[1.75rem] bg-black/65 px-6 py-5 text-center backdrop-blur-sm">
-              <p className="text-lg font-semibold">Connecting to stream...</p>
-              <p className="mt-2 text-sm text-gray-300">Loading the live room and current product state.</p>
-            </div>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-zoop-yellow border-[6px] border-black p-8 text-center shadow-[15px_15px_0px_0px_rgba(0,0,0,1)]"
+            >
+               <Radio size={50} className="mx-auto mb-4 animate-bounce" />
+               <h2 className="text-4xl font-black uppercase italic tracking-tighter leading-none mb-2">SYNCING BEAT...</h2>
+               <p className="text-sm font-bold uppercase tracking-widest text-black/40">Calibrating Hype Levels</p>
+            </motion.div>
           )}
 
           {!isLoading && !hasStreamEnded && session?.status !== 'live' && (
-            <div className="rounded-[1.75rem] bg-black/65 px-6 py-5 text-center backdrop-blur-sm">
-              <p className="text-xl font-semibold">Stream has not started yet</p>
-              <p className="mt-2 text-sm text-gray-300">Stay tuned. Checking again in 00:{String(countdown).padStart(2, '0')}</p>
-            </div>
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="bg-white border-[6px] border-black p-8 text-center shadow-[15px_15px_0px_0px_rgba(244,255,0,1)]"
+            >
+               <Zap size={50} className="mx-auto mb-4 text-zoop-yellow" />
+               <h2 className="text-4xl font-black uppercase italic tracking-tighter leading-none mb-4">Awaiting Signal</h2>
+               <p className="text-lg font-bold italic text-black/60 mb-8">The drop starts in 00:{String(countdown).padStart(2, '0')}</p>
+               <div className="h-2 w-full bg-zinc-100 border-2 border-black">
+                  <motion.div 
+                    className="h-full bg-zoop-yellow"
+                    initial={{ width: '0%' }}
+                    animate={{ width: `${(countdown / 30) * 100}%` }}
+                  />
+               </div>
+            </motion.div>
           )}
 
           {hasStreamEnded && (
-            <div className="max-w-md rounded-[1.75rem] bg-black/70 p-6 text-center backdrop-blur-sm">
-              <p className="text-xs uppercase tracking-[0.3em] text-brand-yellow/80">Session ended</p>
-              <h2 className="mt-3 text-2xl font-semibold">Thanks for watching</h2>
-              <div className="mt-5 rounded-[1.25rem] border border-white/10 bg-white/5 p-4 text-left text-sm text-gray-300">
-                <p>Session: {session?.title || 'Live session'}</p>
-                <p className="mt-2">Final viewer count: {viewerCount}</p>
-                <p className="mt-2">Total reactions: {totalReactions}</p>
-                <p className="mt-2">Featured product: {session?.currentProduct?.name || 'No active product'}</p>
-              </div>
-            </div>
+            <motion.div
+              initial={{ scale: 0.8, rotate: -2 }}
+              animate={{ scale: 1, rotate: 0 }}
+              className="max-w-lg bg-white border-[6px] border-black p-10 text-center shadow-[20px_20px_0px_0px_rgba(0,0,0,1)] pointer-events-auto"
+            >
+               <div className="bg-red-600 text-white px-4 py-1 border-2 border-black inline-block font-black uppercase text-xs mb-6 tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">SIGNAL CUT</div>
+               <h2 className="text-5xl font-black uppercase italic tracking-tighter leading-none mb-8">DROP OVER.</h2>
+               
+               <div className="space-y-4 text-left border-t-4 border-black pt-8">
+                  <div className="flex justify-between border-b-2 border-dashed border-black/10 pb-2">
+                     <span className="text-[10px] font-black uppercase opacity-40">Session ID</span>
+                     <span className="text-xs font-black uppercase italic">{session?.roomId}</span>
+                  </div>
+                  <div className="flex justify-between border-b-2 border-dashed border-black/10 pb-2">
+                     <span className="text-[10px] font-black uppercase opacity-40">Total Hype</span>
+                     <span className="text-xs font-black uppercase italic">{totalReactions} REACTIONS</span>
+                  </div>
+                  <div className="flex justify-between">
+                     <span className="text-[10px] font-black uppercase opacity-40">MVP Status</span>
+                     <span className="text-xs font-black uppercase italic text-blue-600">VERIFIED ATTENDEE</span>
+                  </div>
+               </div>
+
+               <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/')}
+                className="w-full bg-black text-white py-5 mt-10 font-black uppercase italic tracking-tighter text-2xl shadow-[6px_6px_0px_0px_rgba(244,255,0,1)]"
+               >
+                 BACK TO FEED
+               </motion.button>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
+      </div>
 
-        {hasConnectedOnce && !isConnected && !hasStreamEnded && (
-          <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/35 backdrop-blur-sm">
-            <div className="rounded-full bg-black/70 px-5 py-3 text-sm text-white">
-              <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-brand-yellow" />
-              Reconnecting...
-            </div>
-          </div>
-        )}
-
-        <div className="pointer-events-none absolute right-4 top-1/3 z-20 flex flex-col gap-3">
-          {REACTION_BUTTONS.map((reaction) => (
-            <button
-              key={reaction.type}
-              type="button"
+      {/* ── Right-Side Reaction Rail ── */}
+      <div className="absolute top-[20%] right-6 z-40 flex flex-col gap-6">
+        {REACTION_BUTTONS.map((reaction, i) => (
+          <div key={reaction.type} className="flex flex-col items-center gap-1">
+            <motion.button
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: i * 0.1 }}
+              whileHover={{ scale: 1.2, rotate: 5, boxShadow: '6px 6px 0px 0px rgba(0,0,0,0.5)' }}
+              whileTap={{ scale: 0.9, x: 2, y: 2, boxShadow: 'none' }}
               onClick={(event) => handleSendReaction(reaction.type, event)}
-              className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm transition hover:scale-110 hover:bg-brand-yellow hover:text-black"
+              className={`h-14 w-14 flex items-center justify-center border-[3px] border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${reaction.color}`}
             >
               {reaction.icon}
-            </button>
-          ))}
-        </div>
-
-        <div className="space-y-4">
-          <div className="ml-auto max-w-2xl rounded-[1.75rem] bg-black/60 p-4 backdrop-blur-sm">
-            <ProductSpotlight product={session?.currentProduct} />
+            </motion.button>
+            <span className="text-[10px] font-black text-white drop-shadow-md italic uppercase">{reactionCounts[reaction.type]}</span>
           </div>
-
-          <div className="flex items-end justify-between gap-3">
-            <button
-              type="button"
-              onClick={() => setIsQuestionDrawerOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-black/60 px-4 py-3 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-black/75"
-            >
-              <MessageCirclePlus size={18} />
-              Ask a question
-            </button>
-
-            <div className="rounded-full bg-black/60 px-4 py-3 text-xs text-gray-300 backdrop-blur-sm">
-              Like {reactionCounts.like} | Fire {reactionCounts.fire} | Heart {reactionCounts.heart} | Wow {reactionCounts.wow}
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
+
+      {/* ── Bottom Interactive Zone ── */}
+      <div className="absolute inset-x-0 bottom-0 z-30 p-6 flex flex-col md:flex-row items-end justify-between gap-6">
+        
+        {/* Question & Meta */}
+        <div className="flex flex-col gap-4">
+           <motion.button
+             initial={{ y: 20, opacity: 0 }}
+             animate={{ y: 0, opacity: 1 }}
+             onClick={() => setIsQuestionDrawerOpen(true)}
+             className="bg-white border-[3px] border-black px-6 py-4 flex items-center gap-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-zoop-yellow transition-all"
+           >
+             <MessageCirclePlus size={20} strokeWidth={3} />
+             <span className="font-black uppercase italic tracking-tighter">Ask the Host</span>
+           </motion.button>
+
+           <div className="bg-black/80 border-2 border-white/20 p-4 text-white/40 font-black uppercase text-[10px] italic tracking-widest hidden lg:block">
+              SIGNAL FREQUENCY : 105.7 MHZ | ZOOPIN DROP PROTOCOL ACTIVE
+           </div>
+        </div>
+
+        {/* Product In SpotLight */}
+        <motion.div 
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="w-full md:max-w-md lg:max-w-xl"
+        >
+          <div className="bg-white border-[4px] border-black p-6 shadow-[12px_12px_0px_0px_rgba(244,255,0,1)] relative">
+             <div className="absolute -top-4 -left-4 bg-black text-white px-3 py-1 font-black uppercase italic text-[10px] border-2 border-black shadow-[4px_4px_0px_0px_rgba(244,255,0,1)]">
+                NOW DROPPING
+             </div>
+             <ProductSpotlight product={session?.currentProduct} />
+          </div>
+        </motion.div>
+      </div>
+
+      {/* ── Reconnecting UI ── */}
+      <AnimatePresence>
+        {hasConnectedOnce && !isConnected && !hasStreamEnded && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          >
+            <div className="bg-white border-[4px] border-black p-6 flex flex-col items-center shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
+               <div className="h-10 w-10 border-4 border-black border-t-zoop-yellow animate-spin mb-4" />
+               <p className="font-black uppercase italic tracking-tighter">RECONNECTING RADAR...</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <QuestionDrawer
         isOpen={isQuestionDrawerOpen}
@@ -288,11 +377,16 @@ const ViewerRoom = () => {
         onClose={() => setIsQuestionDrawerOpen(false)}
       />
 
-      {streamError && !hasStreamEnded && (
-        <div className="absolute bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full bg-red-500/10 px-4 py-2 text-sm text-red-100 backdrop-blur-sm">
-          {streamError}
-        </div>
-      )}
+      {/* ── Persistent Cart Shortcut ── */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => navigate('/cart')}
+        className="fixed bottom-36 left-6 z-40 h-16 w-16 bg-white border-[3px] border-black flex items-center justify-center shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-zoop-yellow group"
+      >
+        <ShoppingCart size={28} strokeWidth={3} className="transition-transform group-hover:-rotate-12" />
+        <div className="absolute -top-2 -right-2 h-6 w-6 bg-red-600 border-2 border-black text-white text-[10px] font-black flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">3</div>
+      </motion.button>
     </div>
   );
 };

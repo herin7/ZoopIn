@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Radio, Zap, Activity } from 'lucide-react';
-import api from '../lib/api';
+import { ArrowLeft, ChevronDown, ChevronUp, Radio, Zap, Activity, Signal, LayoutGrid } from 'lucide-react';
+import api from '../services/api';
 import LiveFeedSlide from '../components/viewer/LiveFeedSlide';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -72,7 +72,7 @@ const LiveFeed = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center bg-black overflow-hidden relative">
+      <div className="flex h-screen flex-col items-center justify-center bg-black overflow-hidden relative font-sans">
         <Zap className="text-zoop-yellow fill-zoop-yellow opacity-10 absolute scale-[5]" />
         <div className="z-10 text-center">
           <div className="h-20 w-20 border-[6px] border-zoop-yellow border-t-white animate-spin mx-auto mb-8 bg-black shadow-[10px_10px_0px_0px_rgba(255,255,255,0.1)]" />
@@ -84,7 +84,7 @@ const LiveFeed = () => {
 
   if (sessions.length === 0) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center bg-zoop-yellow px-6 text-center select-none overflow-hidden relative">
+      <div className="flex h-screen flex-col items-center justify-center bg-zoop-yellow px-6 text-center select-none overflow-hidden relative font-sans">
         <Zap className="text-black opacity-5 absolute scale-[8] rotate-12" />
         <div className="z-10 max-w-xl border-[6px] border-black bg-white p-12 shadow-[20px_20px_0px_0px_rgba(0,0,0,1)]">
           <Radio size={80} className="mx-auto text-black mb-8" />
@@ -106,11 +106,11 @@ const LiveFeed = () => {
   }
 
   return (
-    <div className="relative h-screen w-full bg-black selection:bg-zoop-yellow selection:text-black touch-none overflow-hidden">
-      
+    <div className="relative h-screen w-full bg-black selection:bg-zoop-yellow selection:text-black touch-none overflow-hidden font-sans">
+
       {/* ── Progress Indicator ── */}
       <div className="absolute top-0 left-0 z-50 h-[8px] bg-white transition-all duration-500 ease-out border-b-2 border-black" style={{ width: `${((activeIndex + 1) / sessions.length) * 100}%` }}>
-         <div className="h-full bg-zoop-yellow w-full shadow-[0px_0px_20px_#f4ff00]" />
+        <div className="h-full bg-zoop-yellow w-full shadow-[0px_0px_20px_#f4ff00]" />
       </div>
 
       {/* ── Header bar ── */}
@@ -124,16 +124,21 @@ const LiveFeed = () => {
           <ArrowLeft size={16} strokeWidth={3} /> Home
         </motion.button>
 
-        <div className="flex flex-col items-end gap-3">
-          <motion.div 
+        <div className="flex flex-col items-end gap-3 pointer-events-auto">
+          <motion.div
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="flex items-center gap-3 bg-red-600 border-2 border-black px-4 py-1 text-white font-black uppercase italic text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] animate-pulse"
           >
             <Activity size={14} strokeWidth={3} /> {sessions.length} CHANNELS LIVE
           </motion.div>
-          <div className="bg-white border-2 border-black px-4 py-1 text-black font-black uppercase italic text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]">
-             DROP {activeIndex + 1} / {sessions.length}
+          <div className="flex gap-2">
+            <div className="bg-white border-2 border-black px-4 py-1 text-black font-black uppercase italic text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]">
+              DROP {activeIndex + 1} / {sessions.length}
+            </div>
+            <button onClick={() => navigate('/buyer')} className="bg-white border-2 border-black p-1 hover:bg-zoop-yellow transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]">
+              <LayoutGrid size={16} strokeWidth={3} />
+            </button>
           </div>
         </div>
       </div>
@@ -170,6 +175,21 @@ const LiveFeed = () => {
         >
           <ChevronDown size={24} strokeWidth={3} />
         </motion.button>
+      </div>
+
+      {/* ── Global Animated Elements ── */}
+      <div className="absolute bottom-10 left-10 pointer-events-none z-10 hidden lg:block overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-6"
+        >
+          <div className="h-[2px] w-40 bg-white/20" />
+          <div className="flex items-center gap-2">
+            <Signal size={20} className="text-zoop-yellow" />
+            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/30 italic">HYPE-RADAR-V3</span>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

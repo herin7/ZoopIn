@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Eye, ShieldCheck, Store, Users, QrCode, Zap, Play, Sparkles } from 'lucide-react';
+import { ArrowRight, Eye, ShieldCheck, Store, Users, QrCode, Zap, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import api from '../lib/api';
+import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { getDefaultRouteForRole } from '../lib/authRoutes';
+import { getDefaultRouteForRole } from '../services/authRoutes';
+import LiveStreamCard from '../components/viewer/LiveStreamCard';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -28,7 +29,6 @@ const LandingPage = () => {
     fetchData();
   }, []);
 
-  // Animation Variants
   const fadeInUp = {
     initial: { opacity: 0, y: 30 },
     animate: { opacity: 1, y: 0 },
@@ -40,7 +40,7 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white font-['Spline_Sans'] selection:bg-black selection:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-white font-sans selection:bg-black selection:text-white overflow-x-hidden">
 
       {/* ─── NAVIGATION ─── */}
       <nav className="fixed top-0 z-[100] w-full border-b-[3px] border-black bg-white/80 backdrop-blur-md px-4 py-3 md:px-6 md:py-4">
@@ -58,6 +58,19 @@ const LandingPage = () => {
           </motion.div>
 
           <div className="flex items-center gap-3 md:gap-6">
+            <motion.a
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileTap={{ scale: 0.9 }}
+              href="https://github.com/herin7/ZoopIn"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex bg-white border-2 border-black p-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-zoop-yellow transition-all"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+              </svg>
+            </motion.a>
+
             <button
               className="hidden text-xs md:text-sm font-black uppercase tracking-tight lg:block hover:text-zoop-yellow transition-colors"
               onClick={() => navigate('/register?role=shop_owner')}
@@ -74,7 +87,7 @@ const LandingPage = () => {
                 >
                   Studio
                 </motion.button>
-                <button onClick={logout} className="bg-black px-4 py-1.5 text-xs md:text-sm font-black uppercase text-white">Exit</button>
+                <button onClick={logout} className="bg-black px-4 py-1.5 text-xs md:text-sm font-black uppercase text-white shadow-[4px_4px_0px_0px_rgba(244,255,0,0.1)]">Exit</button>
               </div>
             ) : (
               <div className="flex gap-2">
@@ -95,7 +108,6 @@ const LandingPage = () => {
 
       {/* ─── HERO SECTION ─── */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zoop-yellow pt-20">
-        {/* Animated Background Shapes */}
         <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
           <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute -top-20 -left-20 text-black"><Zap size={400} /></motion.div>
           <motion.div animate={{ y: [0, 50, 0] }} transition={{ duration: 5, repeat: Infinity }} className="absolute top-1/2 -right-20 text-black"><Sparkles size={300} /></motion.div>
@@ -156,7 +168,6 @@ const LandingPage = () => {
                 className="h-full w-full object-cover opacity-80"
               />
 
-              {/* Overlay Elements */}
               <div className="absolute top-8 left-6 right-6 flex justify-between items-center">
                 <div className="flex items-center gap-2 bg-red-600 px-2 py-0.5 rounded text-[10px] font-black text-white animate-pulse">
                   LIVE
@@ -168,9 +179,7 @@ const LandingPage = () => {
 
               <div className="absolute bottom-10 left-6 right-6 space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full border-2 border-zoop-yellow overflow-hidden bg-white">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Herin" alt="host" />
-                  </div>
+                  <div className="h-10 w-10 rounded-full border-2 border-zoop-yellow overflow-hidden bg-white text-black font-black flex items-center justify-center text-[10px]">HS</div>
                   <div>
                     <p className="text-white font-black text-xs">Herin Soni</p>
                     <p className="text-zoop-yellow text-[10px] font-bold uppercase">Grail Sneakers</p>
@@ -196,7 +205,6 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* Floating Accessory Icons */}
             <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 3, repeat: Infinity }} className="absolute -right-8 top-1/4 bg-white border-2 border-black p-3 shadow-lg">
               <Store className="text-black" />
             </motion.div>
@@ -255,37 +263,7 @@ const LandingPage = () => {
               [1, 2, 3].map(i => <div key={i} className="aspect-[3/4] bg-zinc-100 border-4 border-black animate-pulse shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]" />)
             ) : liveSessions.length > 0 ? (
               liveSessions.map((session) => (
-                <motion.div
-                  key={session._id}
-                  variants={fadeInUp}
-                  whileHover={{ y: -10, rotate: 1 }}
-                  className="group relative cursor-pointer border-4 border-black bg-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all active:shadow-none active:translate-x-1 active:translate-y-1 overflow-hidden"
-                  onClick={() => navigate(`/live/${session.roomId}`)}
-                >
-                  <div className="relative aspect-[3/4] overflow-hidden border-b-4 border-black">
-                    <img
-                      src={session.thumbnail || session.currentProduct?.images?.[0] || 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800'}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      alt={session.title}
-                    />
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="bg-zoop-yellow p-4 rounded-full border-2 border-black">
-                        <Play fill="black" size={24} />
-                      </div>
-                    </div>
-                    <div className="absolute top-4 left-4 bg-red-600 border-2 border-black px-3 py-1 text-xs font-black italic text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">LIVE</div>
-                  </div>
-                  <div className="p-6">
-                    <p className="text-xs font-black uppercase text-black/40">@{session.hostName || 'Seller'}</p>
-                    <h3 className="mt-1 text-2xl font-black uppercase leading-tight tracking-tighter truncate">{session.title}</h3>
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="flex items-center gap-1 text-xs font-bold uppercase"><Users size={14} /> 120 Watching</span>
-                      <div className="h-8 w-8 rounded-full border-2 border-black flex items-center justify-center hover:bg-zoop-yellow transition-colors">
-                        <ArrowRight size={16} />
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+                <LiveStreamCard key={session._id} session={session} />
               ))
             ) : (
               <div className="col-span-full py-20 text-center border-4 border-dashed border-black">
@@ -297,10 +275,11 @@ const LandingPage = () => {
       </section>
 
       {/* ─── DASHING FEATURES ─── */}
-      <section className="bg-zoop-yellow py-24 px-6 border-y-[6px] border-black">
+      <section className="bg-zoop-yellow py-24 px-6 border-y-[6px] border-black space-y-20">
         <div className="mx-auto max-w-[1400px]">
           <div className="text-center mb-20">
-            <h2 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter">The <span className="text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">Zoop</span> Way.</h2>
+            <h2 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-none mb-4">The <span className="text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">Zoop</span> Way.</h2>
+            <p className="text-lg font-black uppercase tracking-widest text-black/40">Zero noise. All hype.</p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
@@ -337,14 +316,28 @@ const LandingPage = () => {
           className="mx-auto max-w-4xl"
         >
           <h2 className="text-5xl md:text-7xl font-black uppercase italic leading-[0.9] mb-10">Ready to <br /> <span className="text-zoop-yellow">Join the Hype?</span></h2>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/register')}
-            className="bg-zoop-yellow text-black border-2 border-white px-12 py-6 text-2xl font-black uppercase italic shadow-[8px_8px_0px_0px_rgba(255,255,255,1)]"
-          >
-            Get Started Now
-          </motion.button>
+          <div className="flex items-center justify-center gap-3">
+            <motion.a
+              whileHover={{ scale: 1.1, rotate: -5 }}
+              whileTap={{ scale: 0.9 }}
+              href="https://github.com/herin7/ZoopIn"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white border-2 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-zoop-yellow transition-all text-black"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+              </svg>
+            </motion.a>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/register')}
+              className="bg-zoop-yellow text-black border-2 border-white px-12 py-6 text-2xl font-black uppercase italic shadow-[8px_8px_0px_0px_rgba(255,255,255,1)]"
+            >
+              Get Started Now
+            </motion.button>
+          </div>
         </motion.div>
       </section>
 
@@ -354,19 +347,19 @@ const LandingPage = () => {
           <div className="grid gap-16 md:grid-cols-4">
             <div className="col-span-2">
               <span className="text-6xl font-black italic tracking-tighter uppercase">ZoopIn</span>
-              <p className="mt-6 max-w-sm text-xl font-bold text-black/60 italic">
+              <p className="mt-6 max-w-sm text-xl font-bold text-black/60 italic leading-snug">
                 Built for the community, <br /> by the community.
               </p>
               <div className="mt-8 flex gap-4">
                 {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="h-12 w-12 border-2 border-black flex items-center justify-center hover:bg-zoop-yellow cursor-pointer transition-colors">
+                  <div key={i} className="h-12 w-12 border-2 border-black flex items-center justify-center hover:bg-zoop-yellow cursor-pointer transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]">
                     <Zap size={20} />
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <h4 className="text-sm font-black uppercase tracking-widest text-black/40 mb-6 underline decoration-zoop-yellow decoration-4 underline-offset-4">Platform</h4>
+              <h4 className="text-xs font-black uppercase tracking-widest text-black/40 mb-6 underline decoration-zoop-yellow decoration-4 underline-offset-4">Platform</h4>
               <ul className="space-y-4 font-black uppercase text-sm">
                 <li className="hover:translate-x-2 transition-transform cursor-pointer" onClick={() => navigate('/feed')}>Browse Feed</li>
                 <li className="hover:translate-x-2 transition-transform cursor-pointer" onClick={() => navigate('/register?role=shop_owner')}>Seller Portal</li>
@@ -374,7 +367,7 @@ const LandingPage = () => {
               </ul>
             </div>
             <div>
-              <h4 className="text-sm font-black uppercase tracking-widest text-black/40 mb-6 underline decoration-zoop-yellow decoration-4 underline-offset-4">Legal</h4>
+              <h4 className="text-xs font-black uppercase tracking-widest text-black/40 mb-6 underline decoration-zoop-yellow decoration-4 underline-offset-4">Legal</h4>
               <ul className="space-y-4 font-black uppercase text-sm">
                 <li className="hover:translate-x-2 transition-transform cursor-pointer">Terms of Service</li>
                 <li className="hover:translate-x-2 transition-transform cursor-pointer">Privacy Policy</li>
@@ -383,8 +376,8 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="mt-20 border-t-4 border-black pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-sm font-black uppercase">© {new Date().getFullYear()} ZoopIn INC.</p>
-            <p className="text-sm font-black uppercase italic text-black/40">Powered by Hype Engine 1.0</p>
+            <p className="text-xs font-black uppercase">© {new Date().getFullYear()} ZoopIn INC.</p>
+            <p className="text-xs font-black uppercase italic text-black/40">Powered by Hype Engine 1.0</p>
           </div>
         </div>
       </footer>

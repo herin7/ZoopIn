@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { LogOut, Zap, ArrowRight, Play, ShoppingBag, Eye, Users as UsersIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import api from '../lib/api';
+import api from '../services/api';
 import LiveRoomCard from '../components/viewer/LiveRoomCard';
 import { useAuthStore } from '../store/authStore';
 import { useToastStore } from '../store/toastStore';
@@ -69,7 +69,7 @@ const BuyerDashboard = () => {
   return (
     <div className="min-h-screen bg-white px-4 py-8 text-black md:px-8 selection:bg-black selection:text-white">
       <div className="mx-auto max-w-7xl">
-        
+
         {/* Header Section */}
         <div className="border-[4px] border-black bg-zoop-yellow p-6 md:p-10 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] mb-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -123,7 +123,7 @@ const BuyerDashboard = () => {
                 { title: 'Grab drops', text: 'Spotlights update instantly. Be fast.' },
               ].map((step, i) => (
                 <div key={step.title} className="bg-white border-2 border-black p-5 shadow-[4px_4px_0px_0px_rgba(244,255,0,1)]">
-                  <span className="text-3xl font-black text-black/10 absolute -mt-8">0{i+1}</span>
+                  <span className="text-3xl font-black text-black/10 absolute -mt-8">0{i + 1}</span>
                   <p className="text-lg font-black uppercase italic tracking-tighter mb-2">{step.title}</p>
                   <p className="text-sm font-bold text-black/60 leading-snug">{step.text}</p>
                 </div>
@@ -220,7 +220,7 @@ const BuyerDashboard = () => {
                       {product.stock > 0 ? 'In Stock' : 'Sold Out'}
                     </div>
                   </div>
-                  
+
                   <div className="mt-5">
                     <p className="text-xs font-black uppercase text-black/40 tracking-widest">{product.category || 'General'}</p>
                     <h4 className="text-xl font-black uppercase italic tracking-tighter truncate mt-1">{product.name}</h4>
@@ -229,7 +229,7 @@ const BuyerDashboard = () => {
                       {product.description || 'No meta added.'}
                     </p>
                   </div>
-                  
+
                   <motion.button
                     whileTap={{ scale: 0.95 }}
                     className="mt-6 w-full border-2 border-black bg-black py-3 text-sm font-black uppercase italic text-white hover:bg-zoop-yellow hover:text-black transition-colors"

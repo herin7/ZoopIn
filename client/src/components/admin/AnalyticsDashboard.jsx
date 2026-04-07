@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   CartesianGrid,
   Line,
@@ -9,8 +10,7 @@ import {
   YAxis,
 } from 'recharts';
 import { Activity, Flame, Heart, Users, Zap, TrendingUp, BarChart3 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import api from '../../lib/api';
+import api from '../../services/api';
 import { useAnalytics } from '../../hooks/useAnalytics';
 
 const AnalyticsDashboard = ({ socket, sessionId, reactionCounts }) => {
@@ -75,7 +75,7 @@ const AnalyticsDashboard = ({ socket, sessionId, reactionCounts }) => {
 
   return (
     <div className="space-y-8 selection:bg-black selection:text-white">
-      
+
       {/* High-Level Stats Grid */}
       <div className="grid gap-6 md:grid-cols-3">
         {[
@@ -108,12 +108,12 @@ const AnalyticsDashboard = ({ socket, sessionId, reactionCounts }) => {
             <div className="flex items-center justify-between mb-4">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/40">{card.title}</p>
               <div className="bg-black text-zoop-yellow p-1.5 border-2 border-black">
-                 {card.icon}
+                {card.icon}
               </div>
             </div>
             <p className="text-4xl font-black uppercase italic tracking-tighter text-black leading-none">{card.value}</p>
             <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-black/30 flex items-center gap-2">
-               <TrendingUp size={12} className="text-zoop-yellow" /> {card.subtitle}
+              <TrendingUp size={12} className="text-zoop-yellow" /> {card.subtitle}
             </p>
           </motion.div>
         ))}
@@ -153,11 +153,11 @@ const AnalyticsDashboard = ({ socket, sessionId, reactionCounts }) => {
                   }}
                   itemStyle={{ color: '#FEF102' }}
                 />
-                <Line 
-                  type="stepAfter" 
-                  dataKey="viewerCount" 
-                  stroke="#FEF102" 
-                  strokeWidth={4} 
+                <Line
+                  type="stepAfter"
+                  dataKey="viewerCount"
+                  stroke="#FEF102"
+                  strokeWidth={4}
                   dot={false}
                   animationDuration={1000}
                 />

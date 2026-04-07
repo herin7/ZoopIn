@@ -10,54 +10,59 @@ const QuestionDrawer = ({
   onClose,
 }) => {
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-4">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-8">
       <div
-        className={`pointer-events-auto w-full max-w-xl rounded-2xl border border-white/10 bg-black/70 p-5 text-white shadow-2xl backdrop-blur-md transition duration-300 ${
-          isOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+        className={`pointer-events-auto w-full max-w-xl border-[4px] border-black bg-white p-6 shadow-[15px_15px_0px_0px_rgba(0,0,0,1)] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+          isOpen ? 'translate-y-0 opacity-100' : 'translate-y-[120%] opacity-0'
         }`}
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-brand-yellow/15 p-2 text-brand-yellow">
-              <MessageCirclePlus size={18} />
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-4">
+            <div className="bg-zoop-yellow border-2 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <MessageCirclePlus size={22} strokeWidth={3} />
             </div>
             <div>
-              <h3 className="text-lg font-bold">Ask a question</h3>
-              <p className="text-sm text-gray-400">Send it straight to the host dashboard.</p>
+              <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-none">Drop Query</h3>
+              <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mt-1">Direct to host dashboard</p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-white/10 p-2 text-gray-300 transition hover:border-white/20 hover:text-white"
+            className="border-2 border-black p-2 hover:bg-black hover:text-white transition-colors"
           >
-            <X size={16} />
+            <X size={18} strokeWidth={3} />
           </button>
         </div>
 
-        <form className="mt-4 space-y-3" onSubmit={onSubmit}>
-          <input
-            value={viewerName}
-            onChange={onViewerNameChange}
-            placeholder="Your name"
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
-          />
-          <textarea
-            value={questionText}
-            onChange={onQuestionTextChange}
-            required
-            maxLength={300}
-            rows={3}
-            placeholder="Ask the host about the product or live demo..."
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
-          />
+        <form className="space-y-4" onSubmit={onSubmit}>
+          <div className="space-y-2">
+             <label className="text-[10px] font-black uppercase tracking-widest text-black">Handle</label>
+             <input
+               value={viewerName}
+               onChange={onViewerNameChange}
+               placeholder="e.g. @hypebeast"
+               className="w-full border-2 border-black bg-white px-4 py-3 text-sm font-bold outline-none focus:bg-zoop-yellow/5"
+             />
+          </div>
+          <div className="space-y-2">
+             <label className="text-[10px] font-black uppercase tracking-widest text-black">Your Question</label>
+             <textarea
+               value={questionText}
+               onChange={onQuestionTextChange}
+               required
+               maxLength={300}
+               rows={3}
+               placeholder="Ask about the drop quality, sizing, or demo..."
+               className="w-full border-2 border-black bg-white px-4 py-3 text-sm font-bold outline-none focus:bg-zoop-yellow/5"
+             />
+          </div>
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-full bg-brand-yellow px-5 py-2.5 text-sm font-bold text-black transition hover:brightness-110"
+            className="group flex w-full h-[54px] items-center justify-center gap-3 bg-black text-white text-sm font-black uppercase italic tracking-tighter shadow-[5px_5px_0px_0px_rgba(244,255,0,1)] hover:bg-zoop-yellow hover:text-black transition-colors"
           >
-            <Send size={14} />
-            Submit Question
+            Submit Signal <Send size={16} strokeWidth={3} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
           </button>
         </form>
       </div>

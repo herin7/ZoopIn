@@ -3,10 +3,10 @@ import { X } from 'lucide-react';
 import { useToastStore } from '../store/toastStore';
 
 const TONE_STYLES = {
-  info: 'border-brand-blue/40 bg-white/5 text-brand-blue',
-  success: 'border-brand-blue/40 bg-white/5 text-brand-blue',
-  warning: 'border-brand-yellow/40 bg-white/5 text-brand-yellow',
-  error: 'border-red-500/40 bg-white/5 text-red-100',
+  info: 'border-black bg-white text-black',
+  success: 'border-black bg-zoop-yellow text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]',
+  warning: 'border-black bg-orange-400 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]',
+  error: 'border-black bg-red-600 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]',
 };
 
 const ToastContainer = () => {
@@ -27,18 +27,18 @@ const ToastContainer = () => {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`pointer-events-auto rounded-2xl border p-4 shadow-lg backdrop-blur-sm ${TONE_STYLES[toast.tone] || TONE_STYLES.info}`}
+          className={`pointer-events-auto border-[3px] p-5 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] ${TONE_STYLES[toast.tone] || TONE_STYLES.info}`}
         >
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold">{toast.title}</p>
-              <p className="mt-1 text-sm opacity-90">{toast.message}</p>
+              <p className="text-lg font-black uppercase italic tracking-tighter leading-none mb-1">{toast.title}</p>
+              <p className="text-sm font-bold opacity-80 leading-tight">{toast.message}</p>
             </div>
             <button
-              className="rounded-full p-1 text-current/80 transition hover:bg-white/10 hover:text-current"
+              className="border-2 border-black bg-black text-white p-1 hover:bg-white hover:text-black transition-colors"
               onClick={() => removeToast(toast.id)}
             >
-              <X size={16} />
+              <X size={16} strokeWidth={3} />
             </button>
           </div>
         </div>

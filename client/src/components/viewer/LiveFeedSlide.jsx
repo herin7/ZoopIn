@@ -10,7 +10,8 @@ import {
   Sparkles,
   ThumbsUp,
   Zap,
-  Tag
+  Tag,
+  ShoppingCart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket } from '../../hooks/useSocket';
@@ -91,45 +92,41 @@ const LiveFeedSlide = ({ session, index, isActive }) => {
     });
   };
 
+  const handleBuy = (e) => {
+    e.stopPropagation();
+    navigate('/cart');
+  };
+
   return (
     <div
       data-index={index}
-      className="feed-slide relative flex h-screen w-full flex-col overflow-hidden bg-black selection:bg-zoop-yellow selection:text-black"
+      className="feed-slide relative flex h-screen w-full flex-col overflow-hidden bg-black selection:bg-zoop-yellow selection:text-black font-sans"
     >
       {/* ── Background: stream video or thumbnail ── */}
-      <div className="absolute inset-0">
-        <AnimatePresence mode="wait">
-          {remoteStream ? (
-            <motion.video
-              key="video"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted={false}
-              className="h-full w-full object-cover"
-            />
-          ) : sessionImage ? (
-            <motion.img
-              key="image"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              src={sessionImage}
-              alt={session.title}
-              className="h-full w-full object-cover brightness-[0.7] grayscale-[0.2]"
-            />
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center bg-zinc-900">
-               <Zap size={100} className="text-white/5 animate-pulse" />
-               <p className="mt-4 text-xs font-black uppercase text-white/20 tracking-[0.5em]">Establishing Signal</p>
-            </div>
-          )}
-        </AnimatePresence>
+      <div className="absolute inset-0 bg-black">
+        {remoteStream ? (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="h-full w-full object-cover grayscale-[0.1]"
+          />
+        ) : sessionImage ? (
+          <img
+            src={sessionImage}
+            alt={session.title}
+            className="h-full w-full object-cover brightness-[0.7] grayscale-[0.2]"
+          />
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center bg-zinc-950">
+             <Zap size={100} className="text-white/5 animate-pulse" />
+             <p className="mt-4 text-xs font-black uppercase text-white/20 tracking-[0.5em]">Establishing Signal</p>
+          </div>
+        )}
       </div>
 
-      {/* ── Overlays ── */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40 pointer-events-none" />
+      {/* ── Overlays: Brutalist Contrast ── */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40 pointer-events-none" />
 
       {/* ── Floating emoji layer ── */}
       {animatingReactions.map((r) => (
@@ -137,117 +134,143 @@ const LiveFeedSlide = ({ session, index, isActive }) => {
       ))}
 
       {/* ── Content overlay ── */}
-      <div className="relative z-20 flex h-full flex-col justify-end px-6 pb-10 sm:px-8 max-w-4xl">
+      <div className="relative z-20 flex h-full flex-col justify-end px-6 pb-12 sm:px-10 lg:px-16 max-w-6xl">
         
         {/* ─ Live badge + viewers ─ */}
-        <div className="absolute left-6 top-20 flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-red-600 border-2 border-black px-3 py-1 text-[11px] font-black uppercase italic text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
-            LIVE
+        <div className="absolute left-6 top-24 sm:left-10 flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-red-600 border-[3px] border-black px-4 py-1 text-[11px] font-black uppercase italic text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+            <span className="h-2 w-2 rounded-full bg-white animate-ping" />
+            VIBE ACTIVE
           </div>
-          <div className="bg-white border-2 border-black px-3 py-1 text-[11px] font-black uppercase italic text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1.5">
-            <Eye size={14} /> {viewerCount}
+          <div className="bg-white border-[3px] border-black px-4 py-1 text-[11px] font-black uppercase italic text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2">
+            <Eye size={16} strokeWidth={3} /> {viewerCount}
           </div>
         </div>
 
         {/* ─ Right-side reaction rail ─ */}
-        <div className="absolute bottom-40 right-6 z-30 flex flex-col items-center gap-5 sm:right-10">
+        <div className="absolute bottom-48 right-6 z-30 flex flex-col items-center gap-6 sm:right-10 lg:right-16">
           {REACTION_BUTTONS.map((btn) => (
-            <div key={btn.type} className="flex flex-col items-center gap-1">
+            <div key={btn.type} className="flex flex-col items-center gap-1 group">
               <motion.button
-                whileHover={{ scale: 1.2, rotate: 5, boxShadow: '6px 6px 0px 0px rgba(0,0,0,1)' }}
+                whileHover={{ scale: 1.25, rotate: 5, boxShadow: '8px 8px_0px_0px_rgba(0,0,0,1)' }}
                 whileTap={{ scale: 0.9, x: 2, y: 2, boxShadow: 'none' }}
                 onClick={(e) => handleSendReaction(btn.type, e)}
-                className={`inline-flex h-14 w-14 items-center justify-center border-[3px] border-black text-black ${btn.color} shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}
+                className={`inline-flex h-16 w-16 items-center justify-center border-[3px] border-black text-black ${btn.color} shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all`}
               >
                 {btn.icon}
               </motion.button>
-              <span className="text-[10px] font-black italic text-white drop-shadow-md">
-                {reactionCounts[btn.type] || 0}
-              </span>
+              <span className="text-[11px] font-black italic text-white drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">{reactionCounts[btn.type] || 0}</span>
             </div>
           ))}
 
           {/* Ask question shortcut */}
-          <div className="flex flex-col items-center gap-1 mt-2">
+          <div className="flex flex-col items-center gap-1 mt-4">
             <motion.button
-              whileHover={{ scale: 1.2, rotate: -5, boxShadow: '6px 6px 0px 0px rgba(0,0,0,1)' }}
-              whileTap={{ scale: 0.9, x: 2, y: 2, boxShadow: 'none' }}
+              whileHover={{ scale: 1.2, rotate: -5, boxShadow: '8px 8px_0px_0px_rgba(0,0,0,1)' }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => navigate(`/live/${session.roomId}`)}
-              className="inline-flex h-14 w-14 items-center justify-center border-[3px] border-black bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              className="inline-flex h-16 w-16 items-center justify-center border-[3px] border-black bg-white text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             >
-              <MessageCirclePlus size={24} />
+              <MessageCirclePlus size={28} strokeWidth={3} />
             </motion.button>
-            <span className="text-[10px] font-black italic text-white drop-shadow-md">ASK</span>
+            <span className="text-[11px] font-black italic text-white drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] uppercase">CHATS</span>
           </div>
         </div>
 
         {/* ─ Bottom info panel ─ */}
         <motion.div 
-          initial={{ y: 30, opacity: 0 }}
+          initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="w-full"
+          className="w-full flex flex-col lg:flex-row lg:items-end justify-between gap-10"
         >
-          {/* Host info */}
-          <div className="flex items-center gap-2 mb-3">
-             <div className="h-2 w-2 bg-zoop-yellow rounded-full animate-pulse" />
-             <p className="text-sm font-black uppercase italic tracking-tighter text-zoop-yellow drop-shadow-sm">
-                @{getHostLabel(session)}
-             </p>
+          <div className="flex-1">
+             {/* Host info */}
+             <div className="flex items-center gap-3 mb-4">
+                <div className="bg-zoop-yellow border-2 border-black p-1">
+                   <Zap size={14} className="fill-black" />
+                </div>
+                <p className="text-lg font-black uppercase italic tracking-tighter text-zoop-yellow drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                   DRAINING @{getHostLabel(session)}
+                </p>
+             </div>
+
+             {/* Session title */}
+             <h2 className="text-4xl sm:text-6xl font-black leading-[0.85] text-white uppercase italic tracking-tighter drop-shadow-[6px_6px_0px_rgba(0,0,0,1)] mb-8">
+               {session.title}
+             </h2>
+
+             {/* Primary Actions */}
+             <div className="flex flex-wrap gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate(`/live/${session.roomId}`)}
+                  className="bg-zoop-yellow border-[4px] border-black px-8 py-4 text-2xl font-black uppercase italic tracking-tighter text-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3 group"
+                >
+                  ENTER THE ROOM <ExternalLink size={24} strokeWidth={4} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                </motion.button>
+                <div className="bg-white/10 border-2 border-white/20 px-6 py-4 backdrop-blur-md hidden sm:block">
+                   <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">CURRENT RADAR</p>
+                   <p className="text-lg font-black text-white tracking-widest uppercase italic truncate max-w-[200px]">{session.roomId}</p>
+                </div>
+             </div>
           </div>
 
-          {/* Session title with brutalist decoration */}
-          <h2 className="text-3xl font-black leading-[0.9] text-white uppercase italic tracking-tighter sm:text-5xl drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-            {session.title}
-          </h2>
-
-          {/* Product card: NEUBRUTALIST UPGRADE */}
+          {/* Product card: HYPE DROPPING */}
           {currentProduct && (
             <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="mt-6 flex items-center gap-4 border-[3px] border-black bg-white p-4 shadow-[8px_8px_0px_0px_rgba(244,255,0,1)] max-w-sm"
+              className="lg:w-96 border-[4px] border-black bg-white p-5 shadow-[12px_12px_0px_0px_rgba(244,255,0,1)] relative group"
             >
-              <div className="h-16 w-16 border-2 border-black flex-shrink-0 bg-black overflow-hidden">
-                {currentProduct.images?.[0] ? (
-                  <img src={currentProduct.images[0]} alt={product} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center text-white/20">
-                     <ShoppingBag size={24} />
-                  </div>
-                )}
+              <div className="absolute -top-4 -right-4 bg-black text-white px-3 py-1 font-black uppercase italic text-[10px] border-2 border-black shadow-[4px_4px_0px_0px_rgba(244,255,0,1)]">
+                 LIVE DROP
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 mb-1">
-                   <Tag size={12} className="text-black/40" />
-                   <p className="text-[9px] font-black uppercase tracking-widest text-black/40 truncate">NOW SHOWCASING</p>
-                </div>
-                <p className="truncate text-base font-black uppercase italic tracking-tighter text-black leading-none">
-                  {currentProduct.name}
-                </p>
-                <p className="mt-2 text-xl font-black italic tracking-tighter text-blue-600 leading-none">
-                  ₹{Number(currentProduct.price || 0).toFixed(0)}
-                </p>
+              <div className="flex gap-4 mb-6">
+                 <div className="h-20 w-20 border-[3px] border-black flex-shrink-0 bg-zinc-100 overflow-hidden">
+                    {currentProduct.images?.[0] ? (
+                      <img src={currentProduct.images[0]} alt="product" className="h-full w-full object-cover grayscale-[0.2] transition-all group-hover:grayscale-0" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-black/10 font-black">?</div>
+                    )}
+                 </div>
+                 <div className="min-w-0 flex-1 flex flex-col justify-center">
+                    <p className="truncate text-xl font-black uppercase italic tracking-tighter text-black leading-none mb-2">
+                       {currentProduct.name}
+                    </p>
+                    <div className="flex items-baseline gap-2">
+                       <p className="text-3xl font-black italic tracking-tighter text-blue-600 leading-none">
+                          ₹{Number(currentProduct.price || 0).toFixed(0)}
+                       </p>
+                    </div>
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                 <motion.button 
+                   whileTap={{ scale: 0.9 }}
+                   onClick={handleBuy}
+                   className="bg-black text-white py-3 font-black uppercase italic tracking-tighter text-xs shadow-[4px_4px_0px_0px_rgba(244,255,0,1)] flex items-center justify-center gap-2"
+                 >
+                    COP NOW <Zap size={14} className="fill-zoop-yellow" />
+                 </motion.button>
+                 <motion.button 
+                   whileTap={{ scale: 0.9 }}
+                   onClick={handleBuy}
+                   className="bg-white border-2 border-black py-3 font-black uppercase italic tracking-tighter text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2"
+                 >
+                    CART <ShoppingCart size={14} strokeWidth={3} />
+                 </motion.button>
               </div>
             </motion.div>
           )}
-
-          {/* Primary CTA */}
-          <motion.button
-            whileHover={{ scale: 1.05, y: -5 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate(`/live/${session.roomId}`)}
-            className="mt-8 flex h-[64px] items-center justify-center gap-3 bg-black px-10 text-xl font-black uppercase italic tracking-tighter text-white border-2 border-white shadow-[6px_6px_0px_0px_rgba(244,255,0,1)] transition-all"
-          >
-            ENTER THE ROOM <ExternalLink size={20} strokeWidth={3} />
-          </motion.button>
         </motion.div>
       </div>
       
       {/* ── Background Branding ── */}
-      <div className="absolute bottom-4 left-6 pointer-events-none opacity-5 select-none">
-         <span className="text-[120px] font-black uppercase italic tracking-tighter text-white">ZOOPIN</span>
+      <div className="absolute bottom-10 left-10 pointer-events-none opacity-5 select-none z-0">
+         <span className="text-[200px] font-black uppercase italic tracking-tighter text-white leading-none">ZOOPIN</span>
       </div>
     </div>
   );

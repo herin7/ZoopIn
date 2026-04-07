@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react';
 import { Navigate, Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Store, UserPlus, Zap, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import api from '../lib/api';
-import { getDefaultRouteForRole } from '../lib/authRoutes';
+import api from '../services/api';
+import { getDefaultRouteForRole } from '../services/authRoutes';
 import { useAuthStore } from '../store/authStore';
 import { useToastStore } from '../store/toastStore';
 
@@ -102,7 +102,7 @@ const RegisterPage = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zoop-yellow px-4 py-12 selection:bg-black selection:text-white">
       <div className="w-full max-w-5xl border-[4px] border-black bg-white shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] lg:grid lg:grid-cols-[1fr_0.8fr]">
-        
+
         {/* Left Side: Role Selection */}
         <div className="border-b-[4px] border-black p-8 lg:border-b-0 lg:border-r-[4px] bg-white">
           <div className="flex items-center gap-2 mb-8 cursor-pointer" onClick={() => navigate('/')}>
@@ -127,11 +127,10 @@ const RegisterPage = () => {
                 whileHover={{ x: 4, y: -4, boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)' }}
                 whileTap={{ x: 2, y: 2, boxShadow: 'none' }}
                 onClick={() => handleRoleChange(roleOption.id)}
-                className={`flex w-full items-start gap-4 border-[3px] border-black p-5 text-left transition-colors ${
-                  selectedRole === roleOption.id
-                    ? 'bg-zoop-yellow shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
-                    : 'bg-white'
-                }`}
+                className={`flex w-full items-start gap-4 border-[3px] border-black p-5 text-left transition-colors ${selectedRole === roleOption.id
+                  ? 'bg-zoop-yellow shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                  : 'bg-white'
+                  }`}
               >
                 <div className={`p-3 border-2 border-black ${selectedRole === roleOption.id ? 'bg-black text-zoop-yellow' : 'bg-zoop-yellow text-black'}`}>
                   {roleOption.icon}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Camera, Mic, MicOff, Radio, Square, VideoOff, Zap, Eye, Circle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import api from '../../lib/api';
+import api from '../../services/api';
 import { useToastStore } from '../../store/toastStore';
 
 const StreamControls = ({ session, socket, localStream, startStream, stopStream, viewerCount, onSessionChange }) => {
@@ -120,22 +120,22 @@ const StreamControls = ({ session, socket, localStream, startStream, stopStream,
 
   return (
     <div className="relative flex h-full flex-col border-[4px] border-black bg-white p-6 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] selection:bg-black selection:text-white overflow-hidden">
-      
+
       {/* Status Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b-2 border-black pb-4 mb-6">
         <div className="flex items-center gap-3">
-           <Zap className="text-zoop-yellow fill-black" size={24} />
-           <h2 className="text-2xl font-black uppercase italic tracking-tighter leading-none">
-              {session?.title || 'Signal Lost...'}
-           </h2>
+          <Zap className="text-zoop-yellow fill-black" size={24} />
+          <h2 className="text-2xl font-black uppercase italic tracking-tighter leading-none">
+            {session?.title || 'Signal Lost...'}
+          </h2>
         </div>
         <div className="flex items-center gap-4">
           <div className={`px-3 py-1 border-2 border-black font-black uppercase italic text-xs flex items-center gap-2 ${isLive ? 'bg-red-600 text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,0.1)] animate-pulse' : 'bg-zinc-100 text-black/30'}`}>
-             <Circle size={10} fill={isLive ? 'white' : 'transparent'} />
-             {isLive ? 'Online' : 'Offline'}
+            <Circle size={10} fill={isLive ? 'white' : 'transparent'} />
+            {isLive ? 'Online' : 'Offline'}
           </div>
           <div className="px-3 py-1 border-2 border-black bg-white font-black uppercase italic text-xs flex items-center gap-2">
-             <Eye size={14} /> {viewerCount} Viewers
+            <Eye size={14} /> {viewerCount} Viewers
           </div>
         </div>
       </div>
@@ -147,12 +147,12 @@ const StreamControls = ({ session, socket, localStream, startStream, stopStream,
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-900">
             <div className="relative">
-               <Radio size={64} className="text-white opacity-20 animate-ping absolute" />
-               <Radio size={64} className="text-zoop-yellow" />
+              <Radio size={64} className="text-white opacity-20 animate-ping absolute" />
+              <Radio size={64} className="text-zoop-yellow" />
             </div>
             <p className="mt-8 text-2xl font-black uppercase italic tracking-tighter text-white">Awaiting Signal</p>
             <p className="mt-2 text-sm font-bold text-white/40 uppercase tracking-widest max-w-xs leading-tight">
-               Local preview is ready. Hit Go Live to broadcast.
+              Local preview is ready. Hit Go Live to broadcast.
             </p>
           </div>
         )}
@@ -181,7 +181,7 @@ const StreamControls = ({ session, socket, localStream, startStream, stopStream,
       {/* Primary Actions */}
       <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
         <p className="text-xs font-black uppercase tracking-[0.3em] text-black/40 italic">Control Frequency 105.7 MHz</p>
-        
+
         <div className="flex items-center gap-4">
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -219,30 +219,30 @@ const StreamControls = ({ session, socket, localStream, startStream, stopStream,
               className="w-full max-w-sm border-[6px] border-black bg-white p-8 shadow-[15px_15px_0px_0px_rgba(0,0,0,1)]"
             >
               <div className="flex flex-col items-center text-center">
-                 <div className="h-20 w-20 border-[4px] border-black bg-red-600 flex items-center justify-center mb-6 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]">
-                    <Square size={32} fill="white" />
-                 </div>
-                 <h3 className="text-3xl font-black uppercase italic tracking-tighter leading-none mb-4 underline decoration-red-600 decoration-[6px]">Kill Signal?</h3>
-                 <p className="text-lg font-bold text-black/60 leading-tight mb-8 italic">
-                   This action will disconnect every viewer instantly.
-                 </p>
-                 
-                 <div className="flex flex-col w-full gap-3">
-                   <motion.button
-                     whileHover={{ scale: 1.02 }}
-                     whileTap={{ scale: 0.98 }}
-                     onClick={endStream}
-                     className="w-full bg-black text-white py-4 font-black uppercase italic tracking-tighter text-xl shadow-[4px_4px_0px_0px_rgba(220,38,38,1)]"
-                   >
-                     Confirm Kill
-                   </motion.button>
-                   <button
-                     onClick={() => setIsEndModalOpen(false)}
-                     className="w-full border-2 border-black py-3 font-black uppercase italic tracking-tighter text-sm hover:bg-zinc-50"
-                   >
-                     Stay Live
-                   </button>
-                 </div>
+                <div className="h-20 w-20 border-[4px] border-black bg-red-600 flex items-center justify-center mb-6 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]">
+                  <Square size={32} fill="white" />
+                </div>
+                <h3 className="text-3xl font-black uppercase italic tracking-tighter leading-none mb-4 underline decoration-red-600 decoration-[6px]">Kill Signal?</h3>
+                <p className="text-lg font-bold text-black/60 leading-tight mb-8 italic">
+                  This action will disconnect every viewer instantly.
+                </p>
+
+                <div className="flex flex-col w-full gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={endStream}
+                    className="w-full bg-black text-white py-4 font-black uppercase italic tracking-tighter text-xl shadow-[4px_4px_0px_0px_rgba(220,38,38,1)]"
+                  >
+                    Confirm Kill
+                  </motion.button>
+                  <button
+                    onClick={() => setIsEndModalOpen(false)}
+                    className="w-full border-2 border-black py-3 font-black uppercase italic tracking-tighter text-sm hover:bg-zinc-50"
+                  >
+                    Stay Live
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

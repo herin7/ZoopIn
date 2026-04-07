@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { getDefaultRouteForRole, getLoginRouteForRole } from '../lib/authRoutes';
+import { getDefaultRouteForRole, getLoginRouteForRole } from '../services/authRoutes';
 import { useAuthStore } from '../store/authStore';
 
 const AdminRoute = ({ children, allowedRoles = [] }) => {
