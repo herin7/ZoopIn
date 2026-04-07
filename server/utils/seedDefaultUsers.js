@@ -30,40 +30,38 @@ const resolvePasswordHash = async (password) => {
 const ensureDefaultUsers = async () => {
   const accounts = getDefaultAccounts();
 
-  await Promise.all(
-    accounts.map(async (account) => {
-      const email = account.email.trim().toLowerCase();
-      const existingUser = await User.findOne({ email });
+  for (const account of accounts) {
+    const email = account.email.trim().toLowerCase();
+    const existingUser = await User.findOne({ email });
 
-      if (!existingUser) {
-        const passwordHash = await resolvePasswordHash(account.password);
+    if (!existingUser) {
+      const passwordHash = await resolvePasswordHash(account.password);
 
-        await User.create({
-          name: account.name,
-          email,
-          password: passwordHash,
-          role: account.role,
-        });
-        return;
-      }
+      await User.create({
+        name: account.name,
+        email,
+        password: passwordHash,
+        role: account.role,
+      });
+      continue;
+    }
 
-      let hasChanges = false;
+    let hasChanges = false;
 
-      if (existingUser.role !== account.role) {
-        existingUser.role = account.role;
-        hasChanges = true;
-      }
+    if (existingUser.role !== account.role) {
+      existingUser.role = account.role;
+      hasChanges = true;
+    }
 
-      if (!existingUser.name && account.name) {
-        existingUser.name = account.name;
-        hasChanges = true;
-      }
+    if (!existingUser.name && account.name) {
+      existingUser.name = account.name;
+      hasChanges = true;
+    }
 
-      if (hasChanges) {
-        await existingUser.save();
-      }
-    })
-  );
+    if (hasChanges) {
+      await existingUser.save();
+    }
+  }
 };
 
 module.exports = {

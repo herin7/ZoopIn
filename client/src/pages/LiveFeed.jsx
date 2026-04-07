@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Radio } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, Radio, Zap, Activity } from 'lucide-react';
 import api from '../lib/api';
 import LiveFeedSlide from '../components/viewer/LiveFeedSlide';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const REFRESH_INTERVAL_MS = 15000;
 
@@ -71,10 +72,11 @@ const LiveFeed = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-black">
-        <div className="text-center animate-fade-in">
-          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-gray-700 border-t-brand-yellow" />
-          <p className="text-sm text-gray-400">Loading live sessions...</p>
+      <div className="flex h-screen flex-col items-center justify-center bg-black overflow-hidden relative">
+        <Zap className="text-zoop-yellow fill-zoop-yellow opacity-10 absolute scale-[5]" />
+        <div className="z-10 text-center">
+          <div className="h-20 w-20 border-[6px] border-zoop-yellow border-t-white animate-spin mx-auto mb-8 bg-black shadow-[10px_10px_0px_0px_rgba(255,255,255,0.1)]" />
+          <h2 className="text-3xl font-black uppercase italic tracking-tighter text-white">SYNCING FEED...</h2>
         </div>
       </div>
     );
@@ -82,54 +84,62 @@ const LiveFeed = () => {
 
   if (sessions.length === 0) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center bg-black px-6 text-center">
-        <div className="animate-slide-up">
-          <Radio size={48} className="mx-auto text-brand-yellow opacity-60" />
-          <h2 className="mt-6 text-2xl font-bold text-white">No live sessions right now</h2>
-          <p className="mt-3 max-w-sm text-sm text-gray-400">
-            When a seller goes live, their stream will appear here. Come back soon!
+      <div className="flex h-screen flex-col items-center justify-center bg-zoop-yellow px-6 text-center select-none overflow-hidden relative">
+        <Zap className="text-black opacity-5 absolute scale-[8] rotate-12" />
+        <div className="z-10 max-w-xl border-[6px] border-black bg-white p-12 shadow-[20px_20px_0px_0px_rgba(0,0,0,1)]">
+          <Radio size={80} className="mx-auto text-black mb-8" />
+          <h2 className="text-5xl font-black uppercase italic tracking-tighter leading-none mb-6">SIGNAL<br /> LOST.</h2>
+          <p className="text-xl font-bold text-black/60 leading-tight mb-10">
+            The marketplace is quiet. Sellers are prepping the next major drop. Hang tight.
           </p>
-          <button
-            type="button"
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/')}
-            className="mt-8 rounded-full bg-brand-yellow px-6 py-3 text-sm font-semibold text-black transition hover:brightness-110"
+            className="w-full bg-black text-white py-5 font-black uppercase italic tracking-tighter text-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)]"
           >
-            Back to home
-          </button>
+            RETURN TO BASE
+          </motion.button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative h-screen w-full bg-black">
+    <div className="relative h-screen w-full bg-black selection:bg-zoop-yellow selection:text-black touch-none overflow-hidden">
+      
+      {/* ── Progress Indicator ── */}
+      <div className="absolute top-0 left-0 z-50 h-[8px] bg-white transition-all duration-500 ease-out border-b-2 border-black" style={{ width: `${((activeIndex + 1) / sessions.length) * 100}%` }}>
+         <div className="h-full bg-zoop-yellow w-full shadow-[0px_0px_20px_#f4ff00]" />
+      </div>
+
       {/* ── Header bar ── */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-30 gradient-feed-top">
-        <div className="pointer-events-auto flex items-center justify-between px-4 py-3 sm:px-6">
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="glass-dark inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-40 p-4 sm:p-6 lg:p-8 flex items-start justify-between">
+        <motion.button
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          onClick={() => navigate('/')}
+          className="pointer-events-auto bg-black border-2 border-white px-4 py-2 text-white font-black uppercase italic text-xs shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] flex items-center gap-2 hover:bg-zoop-yellow hover:text-black hover:border-black transition-all"
+        >
+          <ArrowLeft size={16} strokeWidth={3} /> Home
+        </motion.button>
+
+        <div className="flex flex-col items-end gap-3">
+          <motion.div 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="flex items-center gap-3 bg-red-600 border-2 border-black px-4 py-1 text-white font-black uppercase italic text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] animate-pulse"
           >
-            <ArrowLeft size={16} />
-            <span className="hidden sm:inline">Back</span>
-          </button>
-
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse-live" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-white text-shadow-sm">
-              {sessions.length} Live
-            </span>
-          </div>
-
-          <div className="glass-dark rounded-full px-3 py-2 text-xs font-medium text-gray-300">
-            {activeIndex + 1}/{sessions.length}
+            <Activity size={14} strokeWidth={3} /> {sessions.length} CHANNELS LIVE
+          </motion.div>
+          <div className="bg-white border-2 border-black px-4 py-1 text-black font-black uppercase italic text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]">
+             DROP {activeIndex + 1} / {sessions.length}
           </div>
         </div>
       </div>
 
       {/* ── Vertical snap-scroll feed ── */}
-      <div ref={containerRef} className="feed-scroll h-full w-full">
+      <div ref={containerRef} className="feed-scroll h-full w-full bg-black scrollbar-hide">
         {sessions.map((session, index) => (
           <LiveFeedSlide
             key={session._id}
@@ -140,27 +150,26 @@ const LiveFeed = () => {
         ))}
       </div>
 
-      {/* ── Scroll Progress Indicator ── */}
-      <div className="absolute left-0 top-0 z-40 h-1 bg-brand-yellow transition-all duration-300" style={{ width: `${((activeIndex + 1) / sessions.length) * 100}%` }} />
-
       {/* ── Navigation arrows (desktop) ── */}
-      <div className="pointer-events-none absolute right-4 top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-2 sm:flex">
-        <button
-          type="button"
+      <div className="pointer-events-none absolute right-6 top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-4 sm:flex lg:right-10">
+        <motion.button
+          whileHover={{ scale: 1.1, x: 2 }}
+          whileTap={{ scale: 0.9, x: 0 }}
           disabled={activeIndex === 0}
           onClick={() => scrollTo('up')}
-          className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 disabled:opacity-30"
+          className="pointer-events-auto h-12 w-12 flex items-center justify-center border-[3px] border-black bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-30 transition-all hover:bg-zoop-yellow"
         >
-          <ChevronUp size={20} />
-        </button>
-        <button
-          type="button"
+          <ChevronUp size={24} strokeWidth={3} />
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.1, x: 2 }}
+          whileTap={{ scale: 0.9, x: 0 }}
           disabled={activeIndex === sessions.length - 1}
           onClick={() => scrollTo('down')}
-          className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 disabled:opacity-30"
+          className="pointer-events-auto h-12 w-12 flex items-center justify-center border-[3px] border-black bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-30 transition-all hover:bg-zoop-yellow"
         >
-          <ChevronDown size={20} />
-        </button>
+          <ChevronDown size={24} strokeWidth={3} />
+        </motion.button>
       </div>
     </div>
   );

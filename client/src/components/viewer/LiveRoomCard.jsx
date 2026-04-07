@@ -1,4 +1,5 @@
-import { Eye, PlayCircle } from 'lucide-react';
+import { Eye, Play, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const getSessionImage = (session) =>
   session?.thumbnail || session?.currentProduct?.images?.[0] || '';
@@ -23,52 +24,78 @@ const LiveRoomCard = ({ session, onOpen }) => {
     'Join the live room to see the current showcase, ask questions, and react in real time.';
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur-md">
-      <div className="relative aspect-[16/10] overflow-hidden bg-gray-950">
+    <motion.div
+      whileHover={{ y: -8, x: -8, boxShadow: '10px 10px 0px 0px rgba(0,0,0,1)' }}
+      className="group relative flex flex-col border-[4px] border-black bg-white shadow-[6px_6px_0px_0px_rgba(244,255,0,1)] transition-all overflow-hidden"
+    >
+      {/* Visual Header */}
+      <div className="relative aspect-[16/10] overflow-hidden border-b-[4px] border-black bg-black">
         {sessionImage ? (
-          <img src={sessionImage} alt={session.title} className="h-full w-full object-cover" />
+          <img 
+            src={sessionImage} 
+            alt={session?.title} 
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100" 
+          />
         ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-brand-yellow/15 via-black to-brand-blue/10 text-sm text-gray-400">
-            Thumbnail coming soon
+          <div className="flex h-full flex-col items-center justify-center p-6 text-center">
+            <Zap size={48} className="text-zoop-yellow fill-zoop-yellow mb-4" />
+            <span className="text-xs font-black uppercase tracking-widest text-zoop-yellow">Awaiting Visuals</span>
           </div>
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        <div className="absolute left-3 top-3 rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-white">
-          Live
+        {/* Status Badges */}
+        <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
+          <div className="bg-red-600 border-2 border-black px-3 py-1 text-[10px] font-black uppercase italic text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] animate-pulse">
+            LIVE
+          </div>
+          <div className="bg-white border-2 border-black px-2 py-1 text-[10px] font-black uppercase italic text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1.5">
+            <Eye size={12} /> {session?.viewerCount || 0}
+          </div>
         </div>
-        <div className="absolute right-3 top-3 inline-flex items-center gap-2 rounded-full bg-black/55 px-3 py-1 text-xs text-white backdrop-blur-sm">
-          <Eye size={14} />
-          {session?.viewerCount || 0}
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <p className="text-xs font-bold uppercase tracking-widest text-brand-yellow">
-            Hosted by {getHostLabel(session)}
-          </p>
-          <h3 className="mt-2 text-xl font-semibold text-white">{session?.title}</h3>
+
+        {/* Title Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-black via-black/40 to-transparent">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-1.5 w-1.5 bg-zoop-yellow rounded-full animate-ping" />
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zoop-yellow">
+              Hosted by @{getHostLabel(session)}
+            </p>
+          </div>
+          <h3 className="text-2xl font-black uppercase italic tracking-tighter text-white leading-none truncate">
+            {session?.title}
+          </h3>
         </div>
       </div>
 
-      <div className="space-y-4 p-4">
-        <p className="line-clamp-3 text-sm leading-6 text-gray-300">{sessionDescription}</p>
+      {/* Content Area */}
+      <div className="p-6 flex flex-col flex-1 bg-white">
+        <p className="line-clamp-2 text-sm font-bold text-black/60 leading-snug mb-6 italic">
+          "{sessionDescription}"
+        </p>
 
-        <div className="rounded-2xl border border-white/10 bg-black/40 p-3">
-          <p className="text-xs uppercase tracking-[0.22em] text-gray-500">Now featuring</p>
-          <p className="mt-2 text-sm font-medium text-white">
-            {session?.currentProduct?.name || 'The host is preparing the next product'}
-          </p>
+        {/* Product Callout */}
+        <div className="mt-auto border-2 border-black bg-zoop-yellow/10 p-3 flex items-center gap-3 mb-6">
+          <div className="p-2 border-2 border-black bg-black text-zoop-yellow">
+            <Zap size={16} />
+          </div>
+          <div className="leading-tight">
+             <p className="text-[9px] font-black uppercase tracking-widest text-black/40">Showing Now</p>
+             <p className="text-xs font-black uppercase italic tracking-tighter truncate">
+                {session?.currentProduct?.name || 'Loading Drops...'}
+             </p>
+          </div>
         </div>
 
-        <button
-          type="button"
+        {/* CTA */}
+        <motion.button
+          whileTap={{ scale: 0.95 }}
           onClick={() => onOpen?.(session?.roomId)}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-yellow px-4 py-3 text-sm font-bold text-black transition hover:brightness-110"
+          className="group flex w-full h-[54px] items-center justify-center gap-3 bg-black px-4 text-sm font-black uppercase italic tracking-tighter text-white shadow-[4px_4px_0px_0px_rgba(244,255,0,1)] hover:bg-zoop-yellow hover:text-black transition-colors"
         >
-          <PlayCircle size={16} />
-          Watch live
-        </button>
+          Watch Feed <Play fill="currentColor" size={16} className="group-hover:translate-x-1 transition-transform" />
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

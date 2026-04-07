@@ -9,17 +9,20 @@ import {
   ShoppingBag,
   Sparkles,
   ThumbsUp,
+  Zap,
+  Tag
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket } from '../../hooks/useSocket';
 import { useWebRTCViewer } from '../../hooks/useWebRTCViewer';
 import { useReactions } from '../../hooks/useReactions';
 import FloatingEmoji from './FloatingEmoji';
 
 const REACTION_BUTTONS = [
-  { type: 'like', icon: <ThumbsUp size={20} />, label: 'Like', color: 'bg-brand-yellow', text: 'text-black' },
-  { type: 'fire', icon: <Flame size={20} />, label: 'Fire', color: 'bg-brand-blue', text: 'text-white' },
-  { type: 'heart', icon: <Heart size={20} />, label: 'Love', color: 'bg-brand-blue', text: 'text-white' },
-  { type: 'wow', icon: <Sparkles size={20} />, label: 'Wow', color: 'bg-brand-yellow', text: 'text-black' },
+  { type: 'like', icon: <ThumbsUp size={22} />, label: 'Hype', color: 'bg-zoop-yellow', text: 'text-black' },
+  { type: 'fire', icon: <Flame size={22} />, label: 'Fire', color: 'bg-red-600', text: 'text-white' },
+  { type: 'heart', icon: <Heart size={22} />, label: 'Love', color: 'bg-pink-500', text: 'text-white' },
+  { type: 'wow', icon: <Sparkles size={22} />, label: 'Wow', color: 'bg-blue-600', text: 'text-white' },
 ];
 
 const getSessionImage = (session) =>
@@ -91,36 +94,42 @@ const LiveFeedSlide = ({ session, index, isActive }) => {
   return (
     <div
       data-index={index}
-      className="feed-slide relative flex h-screen w-full flex-col overflow-hidden bg-black"
+      className="feed-slide relative flex h-screen w-full flex-col overflow-hidden bg-black selection:bg-zoop-yellow selection:text-black"
     >
       {/* ── Background: stream video or thumbnail ── */}
       <div className="absolute inset-0">
-        {remoteStream ? (
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted={false}
-            className="h-full w-full object-cover"
-          />
-        ) : sessionImage ? (
-          <img
-            src={sessionImage}
-            alt={session.title}
-            className="h-full w-full object-cover brightness-75"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900">
-            <ShoppingBag size={64} className="text-gray-700" />
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {remoteStream ? (
+            <motion.video
+              key="video"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted={false}
+              className="h-full w-full object-cover"
+            />
+          ) : sessionImage ? (
+            <motion.img
+              key="image"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              src={sessionImage}
+              alt={session.title}
+              className="h-full w-full object-cover brightness-[0.7] grayscale-[0.2]"
+            />
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center bg-zinc-900">
+               <Zap size={100} className="text-white/5 animate-pulse" />
+               <p className="mt-4 text-xs font-black uppercase text-white/20 tracking-[0.5em]">Establishing Signal</p>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* ── Top gradient ── */}
-      <div className="absolute inset-x-0 top-0 h-32 gradient-feed-top" />
-
-      {/* ── Bottom gradient ── */}
-      <div className="absolute inset-x-0 bottom-0 h-[45%] gradient-feed-bottom" />
+      {/* ── Overlays ── */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40 pointer-events-none" />
 
       {/* ── Floating emoji layer ── */}
       {animatingReactions.map((r) => (
@@ -128,101 +137,117 @@ const LiveFeedSlide = ({ session, index, isActive }) => {
       ))}
 
       {/* ── Content overlay ── */}
-      <div className="relative z-20 flex h-full flex-col justify-end px-4 pb-6 sm:px-6">
+      <div className="relative z-20 flex h-full flex-col justify-end px-6 pb-10 sm:px-8 max-w-4xl">
+        
         {/* ─ Live badge + viewers ─ */}
-        <div className="absolute left-4 top-16 flex items-center gap-2 sm:left-6">
-          <span className="inline-flex items-center gap-1.5 rounded bg-red-500 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
-            <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse-live" />
-            Live
-          </span>
-          <span className="glass-dark inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs text-white">
-            <Eye size={13} />
-            {viewerCount}
-          </span>
+        <div className="absolute left-6 top-20 flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-red-600 border-2 border-black px-3 py-1 text-[11px] font-black uppercase italic text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+            LIVE
+          </div>
+          <div className="bg-white border-2 border-black px-3 py-1 text-[11px] font-black uppercase italic text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1.5">
+            <Eye size={14} /> {viewerCount}
+          </div>
         </div>
 
         {/* ─ Right-side reaction rail ─ */}
-        <div className="absolute bottom-32 right-4 z-30 flex flex-col items-center gap-3 sm:right-6">
+        <div className="absolute bottom-40 right-6 z-30 flex flex-col items-center gap-5 sm:right-10">
           {REACTION_BUTTONS.map((btn) => (
-            <button
-              key={btn.type}
-              type="button"
-              onClick={(e) => handleSendReaction(btn.type, e)}
-              className="group flex flex-col items-center gap-1"
-            >
-              <span className={`inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition group-hover:scale-110 group-hover:${btn.color} group-hover:${btn.text} group-active:scale-95`}>
+            <div key={btn.type} className="flex flex-col items-center gap-1">
+              <motion.button
+                whileHover={{ scale: 1.2, rotate: 5, boxShadow: '6px 6px 0px 0px rgba(0,0,0,1)' }}
+                whileTap={{ scale: 0.9, x: 2, y: 2, boxShadow: 'none' }}
+                onClick={(e) => handleSendReaction(btn.type, e)}
+                className={`inline-flex h-14 w-14 items-center justify-center border-[3px] border-black text-black ${btn.color} shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}
+              >
                 {btn.icon}
-              </span>
-              <span className="text-[10px] font-medium text-white/70">
+              </motion.button>
+              <span className="text-[10px] font-black italic text-white drop-shadow-md">
                 {reactionCounts[btn.type] || 0}
               </span>
-            </button>
+            </div>
           ))}
 
           {/* Ask question shortcut */}
-          <button
-            type="button"
-            onClick={() => navigate(`/live/${session.roomId}`)}
-            className="group flex flex-col items-center gap-1"
-          >
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition group-hover:scale-110 group-hover:bg-white/20 group-active:scale-95">
-              <MessageCirclePlus size={20} />
-            </span>
-            <span className="text-[10px] font-medium text-white/70">Ask</span>
-          </button>
+          <div className="flex flex-col items-center gap-1 mt-2">
+            <motion.button
+              whileHover={{ scale: 1.2, rotate: -5, boxShadow: '6px 6px 0px 0px rgba(0,0,0,1)' }}
+              whileTap={{ scale: 0.9, x: 2, y: 2, boxShadow: 'none' }}
+              onClick={() => navigate(`/live/${session.roomId}`)}
+              className="inline-flex h-14 w-14 items-center justify-center border-[3px] border-black bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            >
+              <MessageCirclePlus size={24} />
+            </motion.button>
+            <span className="text-[10px] font-black italic text-white drop-shadow-md">ASK</span>
+          </div>
         </div>
 
         {/* ─ Bottom info panel ─ */}
-        <div className="max-w-lg animate-slide-up">
-          {/* Host name */}
-          <p className="text-xs font-bold uppercase tracking-wider text-brand-yellow text-shadow-sm">
-            @{getHostLabel(session)}
-          </p>
+        <motion.div 
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="w-full"
+        >
+          {/* Host info */}
+          <div className="flex items-center gap-2 mb-3">
+             <div className="h-2 w-2 bg-zoop-yellow rounded-full animate-pulse" />
+             <p className="text-sm font-black uppercase italic tracking-tighter text-zoop-yellow drop-shadow-sm">
+                @{getHostLabel(session)}
+             </p>
+          </div>
 
-          {/* Session title */}
-          <h2 className="mt-2 text-xl font-bold leading-tight text-white text-shadow-md sm:text-2xl">
+          {/* Session title with brutalist decoration */}
+          <h2 className="text-3xl font-black leading-[0.9] text-white uppercase italic tracking-tighter sm:text-5xl drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">
             {session.title}
           </h2>
 
-          {/* Description */}
-          {session.description && (
-            <p className="mt-2 line-clamp-2 text-sm text-gray-200 text-shadow-sm">
-              {session.description}
-            </p>
-          )}
-
-          {/* Product card */}
+          {/* Product card: NEUBRUTALIST UPGRADE */}
           {currentProduct && (
-            <div className="mt-3 flex items-center gap-3 rounded-xl bg-black/40 p-3 backdrop-blur-sm">
-              {currentProduct.images?.[0] && (
-                <img
-                  src={currentProduct.images[0]}
-                  alt={currentProduct.name}
-                  className="h-14 w-14 rounded-lg object-cover"
-                />
-              )}
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="mt-6 flex items-center gap-4 border-[3px] border-black bg-white p-4 shadow-[8px_8px_0px_0px_rgba(244,255,0,1)] max-w-sm"
+            >
+              <div className="h-16 w-16 border-2 border-black flex-shrink-0 bg-black overflow-hidden">
+                {currentProduct.images?.[0] ? (
+                  <img src={currentProduct.images[0]} alt={product} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-white/20">
+                     <ShoppingBag size={24} />
+                  </div>
+                )}
+              </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs uppercase tracking-wider text-brand-yellow">Now showing</p>
-                <p className="mt-0.5 truncate text-sm font-semibold text-white">
+                <div className="flex items-center gap-1.5 mb-1">
+                   <Tag size={12} className="text-black/40" />
+                   <p className="text-[9px] font-black uppercase tracking-widest text-black/40 truncate">NOW SHOWCASING</p>
+                </div>
+                <p className="truncate text-base font-black uppercase italic tracking-tighter text-black leading-none">
                   {currentProduct.name}
                 </p>
-                <p className="mt-0.5 text-sm font-bold text-brand-yellow">
-                  ₹{Number(currentProduct.price || 0).toFixed(2)}
+                <p className="mt-2 text-xl font-black italic tracking-tighter text-blue-600 leading-none">
+                  ₹{Number(currentProduct.price || 0).toFixed(0)}
                 </p>
               </div>
-            </div>
+            </motion.div>
           )}
 
-          {/* CTA */}
-          <button
-            type="button"
+          {/* Primary CTA */}
+          <motion.button
+            whileHover={{ scale: 1.05, y: -5 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => navigate(`/live/${session.roomId}`)}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-yellow px-5 py-2.5 text-sm font-bold text-black transition hover:brightness-110 active:scale-95"
+            className="mt-8 flex h-[64px] items-center justify-center gap-3 bg-black px-10 text-xl font-black uppercase italic tracking-tighter text-white border-2 border-white shadow-[6px_6px_0px_0px_rgba(244,255,0,1)] transition-all"
           >
-            <ExternalLink size={15} />
-            Open full room
-          </button>
-        </div>
+            ENTER THE ROOM <ExternalLink size={20} strokeWidth={3} />
+          </motion.button>
+        </motion.div>
+      </div>
+      
+      {/* ── Background Branding ── */}
+      <div className="absolute bottom-4 left-6 pointer-events-none opacity-5 select-none">
+         <span className="text-[120px] font-black uppercase italic tracking-tighter text-white">ZOOPIN</span>
       </div>
     </div>
   );

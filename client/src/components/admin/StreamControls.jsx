@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Camera, Mic, MicOff, Radio, Square, VideoOff } from 'lucide-react';
+import { Camera, Mic, MicOff, Radio, Square, VideoOff, Zap, Eye, Circle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../lib/api';
 import { useToastStore } from '../../store/toastStore';
 
@@ -118,115 +119,135 @@ const StreamControls = ({ session, socket, localStream, startStream, stopStream,
   };
 
   return (
-    <div className="relative flex h-full flex-col rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur-md">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-bold uppercase tracking-widest text-brand-yellow">Live Control Room</p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">
-            {session?.title || 'Create a session to begin'}
-          </h2>
+    <div className="relative flex h-full flex-col border-[4px] border-black bg-white p-6 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] selection:bg-black selection:text-white overflow-hidden">
+      
+      {/* Status Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b-2 border-black pb-4 mb-6">
+        <div className="flex items-center gap-3">
+           <Zap className="text-zoop-yellow fill-black" size={24} />
+           <h2 className="text-2xl font-black uppercase italic tracking-tighter leading-none">
+              {session?.title || 'Signal Lost...'}
+           </h2>
         </div>
-        <div className="flex items-center gap-3 rounded-full border border-white/10 bg-gray-950/80 px-4 py-2 text-sm text-gray-300">
-          <span className={`h-2.5 w-2.5 rounded-full ${isLive ? 'animate-pulse-live bg-red-500' : 'bg-gray-600'}`} />
-          {isLive ? 'Live' : 'Offline'}
-          <span className="text-gray-500">•</span>
-          <span>{viewerCount} viewers</span>
+        <div className="flex items-center gap-4">
+          <div className={`px-3 py-1 border-2 border-black font-black uppercase italic text-xs flex items-center gap-2 ${isLive ? 'bg-red-600 text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,0.1)] animate-pulse' : 'bg-zinc-100 text-black/30'}`}>
+             <Circle size={10} fill={isLive ? 'white' : 'transparent'} />
+             {isLive ? 'Online' : 'Offline'}
+          </div>
+          <div className="px-3 py-1 border-2 border-black bg-white font-black uppercase italic text-xs flex items-center gap-2">
+             <Eye size={14} /> {viewerCount} Viewers
+          </div>
         </div>
       </div>
 
-      <div className="relative mt-5 flex min-h-[320px] flex-1 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black">
+      {/* Video Canvas */}
+      <div className="relative flex-1 min-h-[400px] border-[4px] border-black bg-black overflow-hidden group shadow-[inset_0px_0px_60px_rgba(0,0,0,0.8)]">
         {localStream ? (
-          <video ref={videoRef} autoPlay muted playsInline className="h-full w-full object-cover" />
+          <video ref={videoRef} autoPlay muted playsInline className="h-full w-full object-cover grayscale-[0.2] transition-all group-hover:grayscale-0" />
         ) : (
-          <div className="text-center text-gray-400">
-            <Radio size={42} className="mx-auto text-gray-600" />
-            <p className="mt-4 text-lg font-medium text-gray-200">Local preview is ready when you are</p>
-            <p className="mt-2 text-sm text-gray-500">
-              Click Go Live to start camera capture and broadcast to the room.
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-900">
+            <div className="relative">
+               <Radio size={64} className="text-white opacity-20 animate-ping absolute" />
+               <Radio size={64} className="text-zoop-yellow" />
+            </div>
+            <p className="mt-8 text-2xl font-black uppercase italic tracking-tighter text-white">Awaiting Signal</p>
+            <p className="mt-2 text-sm font-bold text-white/40 uppercase tracking-widest max-w-xs leading-tight">
+               Local preview is ready. Hit Go Live to broadcast.
             </p>
+          </div>
+        )}
+
+        {/* Floating Controls Over Video */}
+        {localStream && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 z-10 transition-transform group-hover:scale-110">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsCameraEnabled(v => !v)}
+              className={`h-14 w-14 border-2 border-black flex items-center justify-center transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] ${isCameraEnabled ? 'bg-white text-black' : 'bg-red-600 text-white'}`}
+            >
+              {isCameraEnabled ? <Camera size={24} /> : <VideoOff size={24} />}
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsMicEnabled(v => !v)}
+              className={`h-14 w-14 border-2 border-black flex items-center justify-center transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] ${isMicEnabled ? 'bg-white text-black' : 'bg-red-600 text-white'}`}
+            >
+              {isMicEnabled ? <Mic size={24} /> : <MicOff size={24} />}
+            </motion.button>
           </div>
         )}
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setIsCameraEnabled((currentValue) => !currentValue)}
-            disabled={!localStream}
-            className={`rounded-full border px-4 py-3 transition ${
-              isCameraEnabled
-              ? 'border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow'
-                : 'border-white/10 bg-black text-gray-400'
-            } disabled:cursor-not-allowed disabled:opacity-50`}
-          >
-            {isCameraEnabled ? <Camera size={18} /> : <VideoOff size={18} />}
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsMicEnabled((currentValue) => !currentValue)}
-            disabled={!localStream}
-            className={`rounded-full border px-4 py-3 transition ${
-              isMicEnabled
-              ? 'border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow'
-                : 'border-white/10 bg-black text-gray-400'
-            } disabled:cursor-not-allowed disabled:opacity-50`}
-          >
-            {isMicEnabled ? <Mic size={18} /> : <MicOff size={18} />}
-          </button>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
+      {/* Primary Actions */}
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+        <p className="text-xs font-black uppercase tracking-[0.3em] text-black/40 italic">Control Frequency 105.7 MHz</p>
+        
+        <div className="flex items-center gap-4">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             disabled={!session || isStarting || isLive}
             onClick={goLive}
-            className="rounded-full bg-brand-yellow px-5 py-3 text-sm font-bold text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-gray-700"
+            className="px-8 py-4 bg-zoop-yellow border-[3px] border-black font-black uppercase italic tracking-tighter text-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] disabled:bg-zinc-200 disabled:shadow-none transition-all"
           >
-            {isStarting ? 'Starting...' : 'Go Live'}
-          </button>
-          <button
-            type="button"
+            {isStarting ? 'CONNECTING...' : 'Go Live'}
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             disabled={!session || !isLive || isEnding}
             onClick={() => setIsEndModalOpen(true)}
-            className="rounded-full bg-red-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-red-900"
+            className="px-8 py-4 bg-white border-[3px] border-black font-black uppercase italic tracking-tighter text-xl shadow-[6px_6px_0px_0px_rgba(220,38,38,1)] hover:bg-red-600 hover:text-white disabled:opacity-30 disabled:shadow-none transition-all"
           >
-            {isEnding ? 'Ending...' : 'End Stream'}
-          </button>
+            {isEnding ? 'CUTTING...' : 'Kill Stream'}
+          </motion.button>
         </div>
       </div>
 
-      {isEndModalOpen && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-[2rem] bg-black/70 p-6 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-[1.5rem] border border-white/10 bg-gray-900 p-6 text-white shadow-2xl">
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-red-500/15 p-2 text-red-300">
-                <Square size={18} />
+      {/* Neubrutalist Confirmation Modal */}
+      <AnimatePresence>
+        {isEndModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 flex items-center justify-center z-50 p-6 bg-black/40 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="w-full max-w-sm border-[6px] border-black bg-white p-8 shadow-[15px_15px_0px_0px_rgba(0,0,0,1)]"
+            >
+              <div className="flex flex-col items-center text-center">
+                 <div className="h-20 w-20 border-[4px] border-black bg-red-600 flex items-center justify-center mb-6 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]">
+                    <Square size={32} fill="white" />
+                 </div>
+                 <h3 className="text-3xl font-black uppercase italic tracking-tighter leading-none mb-4 underline decoration-red-600 decoration-[6px]">Kill Signal?</h3>
+                 <p className="text-lg font-bold text-black/60 leading-tight mb-8 italic">
+                   This action will disconnect every viewer instantly.
+                 </p>
+                 
+                 <div className="flex flex-col w-full gap-3">
+                   <motion.button
+                     whileHover={{ scale: 1.02 }}
+                     whileTap={{ scale: 0.98 }}
+                     onClick={endStream}
+                     className="w-full bg-black text-white py-4 font-black uppercase italic tracking-tighter text-xl shadow-[4px_4px_0px_0px_rgba(220,38,38,1)]"
+                   >
+                     Confirm Kill
+                   </motion.button>
+                   <button
+                     onClick={() => setIsEndModalOpen(false)}
+                     className="w-full border-2 border-black py-3 font-black uppercase italic tracking-tighter text-sm hover:bg-zinc-50"
+                   >
+                     Stay Live
+                   </button>
+                 </div>
               </div>
-              <h3 className="text-lg font-semibold">End the live stream?</h3>
-            </div>
-            <p className="mt-3 text-sm text-gray-300">
-              This disconnects the host and tells viewers the session has ended.
-            </p>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setIsEndModalOpen(false)}
-                className="rounded-full border border-white/10 px-4 py-2 text-sm text-gray-300 transition hover:border-white/20 hover:text-white"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={endStream}
-                className="rounded-full bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-400"
-              >
-                Confirm End
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

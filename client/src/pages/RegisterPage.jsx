@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Navigate, Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Store, UserPlus } from 'lucide-react';
+import { Store, UserPlus, Zap, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../lib/api';
 import { getDefaultRouteForRole } from '../lib/authRoutes';
 import { useAuthStore } from '../store/authStore';
@@ -10,13 +11,13 @@ const ROLE_OPTIONS = [
   {
     id: 'buyer',
     label: 'Buyer',
-    icon: <UserPlus size={18} />,
+    icon: <UserPlus size={24} />,
     description: 'Create an account to join live rooms, ask questions, and follow product drops.',
   },
   {
     id: 'shop_owner',
     label: 'Shop Owner',
-    icon: <Store size={18} />,
+    icon: <Store size={24} />,
     description: 'Open your selling dashboard, upload products, and host live product sessions.',
   },
 ];
@@ -99,52 +100,67 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black px-4 text-white">
-      <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur-md lg:grid lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="border-b border-white/10 bg-black/40 p-8 lg:border-b-0 lg:border-r">
-          <p className="text-sm font-bold uppercase tracking-widest text-brand-yellow">Create Account</p>
-          <h1 className="mt-3 text-3xl font-semibold">Choose how you want to use ZoopIn</h1>
-          <p className="mt-3 text-sm text-gray-400">
-            Buyers join live shopping rooms and discover products. Shop owners run streams and manage catalog launches.
+    <div className="flex min-h-screen items-center justify-center bg-zoop-yellow px-4 py-12 selection:bg-black selection:text-white">
+      <div className="w-full max-w-5xl border-[4px] border-black bg-white shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] lg:grid lg:grid-cols-[1fr_0.8fr]">
+        
+        {/* Left Side: Role Selection */}
+        <div className="border-b-[4px] border-black p-8 lg:border-b-0 lg:border-r-[4px] bg-white">
+          <div className="flex items-center gap-2 mb-8 cursor-pointer" onClick={() => navigate('/')}>
+            <div className="bg-black p-1.5 rounded-lg">
+              <Zap className="text-zoop-yellow fill-zoop-yellow" size={20} />
+            </div>
+            <span className="text-2xl font-black tracking-tighter uppercase italic">ZoopIn</span>
+          </div>
+
+          <h1 className="text-4xl font-black uppercase italic tracking-tighter text-black leading-none">
+            Start <br /> Fresh.
+          </h1>
+          <p className="mt-4 text-lg font-bold text-black/60 leading-tight">
+            How do you want to play?
           </p>
 
-          <div className="mt-8 space-y-3">
+          <div className="mt-10 space-y-4">
             {ROLE_OPTIONS.map((roleOption) => (
-              <button
+              <motion.button
                 key={roleOption.id}
                 type="button"
+                whileHover={{ x: 4, y: -4, boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)' }}
+                whileTap={{ x: 2, y: 2, boxShadow: 'none' }}
                 onClick={() => handleRoleChange(roleOption.id)}
-                className={`flex w-full items-start gap-3 rounded-[1.5rem] border p-4 text-left transition ${
+                className={`flex w-full items-start gap-4 border-[3px] border-black p-5 text-left transition-colors ${
                   selectedRole === roleOption.id
-                    ? 'border-brand-yellow/50 bg-brand-yellow/10'
-                    : 'border-white/10 bg-white/5 hover:border-white/20'
+                    ? 'bg-zoop-yellow shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                    : 'bg-white'
                 }`}
               >
-                <div className="rounded-2xl bg-white/5 p-3 text-brand-yellow">{roleOption.icon}</div>
-                <div>
-                  <p className="font-medium text-white">{roleOption.label}</p>
-                  <p className="mt-1 text-sm text-gray-400">{roleOption.description}</p>
+                <div className={`p-3 border-2 border-black ${selectedRole === roleOption.id ? 'bg-black text-zoop-yellow' : 'bg-zoop-yellow text-black'}`}>
+                  {roleOption.icon}
                 </div>
-              </button>
+                <div>
+                  <p className="text-xl font-black uppercase italic tracking-tighter leading-none">{roleOption.label}</p>
+                  <p className="mt-2 text-sm font-bold text-black/50 leading-snug">{roleOption.description}</p>
+                </div>
+              </motion.button>
             ))}
           </div>
 
-          <p className="mt-6 text-sm text-gray-500">
-            Admin accounts are provisioned separately and sign in from the admin login flow.
+          <p className="mt-8 text-xs font-bold text-black/40 uppercase tracking-widest leading-loose">
+            Admin accounts are restricted and managed via internal hardware keys.
           </p>
         </div>
 
-        <div className="p-8">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-gray-500">Register</p>
-            <h2 className="mt-2 text-2xl font-semibold">
-              {selectedRole === 'shop_owner' ? 'Create a shop owner account' : 'Create a buyer account'}
+        {/* Right Side: Registration Form */}
+        <div className="p-8 md:p-12 bg-white flex flex-col justify-center">
+          <div className="mb-10 text-center lg:text-left">
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-black/30">New Identity</p>
+            <h2 className="mt-2 text-3xl font-black uppercase italic tracking-tighter decoration-zoop-yellow decoration-[6px] underline underline-offset-4">
+              {selectedRole === 'shop_owner' ? 'Seller Signup' : 'Buyer Signup'}
             </h2>
           </div>
 
-          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-300">Full name</label>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-black">Display Name</label>
               <input
                 type="text"
                 required
@@ -155,13 +171,13 @@ const RegisterPage = () => {
                     name: event.target.value,
                   }))
                 }
-                className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
-                placeholder={selectedRole === 'shop_owner' ? 'Asha Sharma' : 'Riya Kapoor'}
+                className="w-full border-[3px] border-black bg-white p-4 text-sm font-bold outline-none transition-all focus:bg-zoop-yellow/10"
+                placeholder={selectedRole === 'shop_owner' ? 'Your Shop Name' : 'Full Name'}
               />
             </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-300">Email</label>
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-black">Email Address</label>
               <input
                 type="email"
                 required
@@ -172,14 +188,14 @@ const RegisterPage = () => {
                     email: event.target.value,
                   }))
                 }
-                className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
+                className="w-full border-[3px] border-black bg-white p-4 text-sm font-bold outline-none transition-all focus:bg-zoop-yellow/10"
                 placeholder="you@example.com"
               />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-300">Password</label>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-black">Password</label>
                 <input
                   type="password"
                   required
@@ -191,13 +207,13 @@ const RegisterPage = () => {
                       password: event.target.value,
                     }))
                   }
-                  className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
-                  placeholder="At least 6 characters"
+                  className="w-full border-[3px] border-black bg-white p-4 text-sm font-bold outline-none transition-all focus:bg-zoop-yellow/10"
+                  placeholder="Min 6 chars"
                 />
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-300">Confirm password</label>
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-black">Confirm</label>
                 <input
                   type="password"
                   required
@@ -209,27 +225,38 @@ const RegisterPage = () => {
                       confirmPassword: event.target.value,
                     }))
                   }
-                  className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-brand-yellow"
-                  placeholder="Repeat password"
+                  className="w-full border-[3px] border-black bg-white p-4 text-sm font-bold outline-none transition-all focus:bg-zoop-yellow/10"
+                  placeholder="Repeat it"
                 />
               </div>
             </div>
 
-            <button
+            <motion.button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-2xl bg-brand-yellow px-4 py-3 text-sm font-bold text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-gray-700"
+              whileHover={{ scale: 1.02, rotate: 1 }}
+              whileTap={{ scale: 0.98, x: 2, y: 2, boxShadow: 'none' }}
+              className="group flex w-full h-[60px] items-center justify-center gap-3 bg-black px-4 text-lg font-black uppercase italic tracking-tighter text-white shadow-[6px_6px_0px_0px_rgba(244,255,0,1)] disabled:bg-zinc-800 disabled:shadow-none transition-all"
             >
-              {isSubmitting ? 'Creating account...' : 'Create account'}
-            </button>
+              {isSubmitting ? 'Onboarding...' : (
+                <>
+                  Join ZoopIn <ArrowRight className="group-hover:translate-x-2 transition-transform" />
+                </>
+              )}
+            </motion.button>
           </form>
 
-          <p className="mt-6 text-sm text-gray-400">
-            Already have an account?{' '}
-            <Link to={`/login?role=${selectedRole}`} className="font-bold text-brand-blue hover:text-brand-blue-hover">
-              Sign in
-            </Link>
-          </p>
+          <div className="mt-8 text-center lg:text-left">
+            <p className="text-sm font-bold uppercase italic tracking-tighter">
+              Dashing already?{' '}
+              <Link
+                to={`/login?role=${selectedRole}`}
+                className="text-black underline decoration-zoop-yellow decoration-4 underline-offset-4 hover:bg-zoop-yellow"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

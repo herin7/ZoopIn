@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Eye, PlayCircle, ShieldCheck, ShoppingBag, Store, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowRight, Eye, ShieldCheck, Store, Users, QrCode, Zap, Play, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 import { getDefaultRouteForRole } from '../lib/authRoutes';
@@ -10,385 +12,380 @@ const LandingPage = () => {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const [liveSessions, setLiveSessions] = useState([]);
-  const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true);
       try {
-        const [sessionsRes, productsRes] = await Promise.all([
-          api.get('/api/sessions/live'),
-          api.get('/api/products?isActive=true'),
-        ]);
+        const sessionsRes = await api.get('/api/sessions/live');
         setLiveSessions(sessionsRes.data.data || []);
-        setProducts(productsRes.data.data || []);
-      } catch {
-        setLiveSessions([]);
-        setProducts([]);
+      } catch (err) {
+        console.error("Fetch failed", err);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchData();
-    const interval = window.setInterval(fetchData, 20000);
-    return () => window.clearInterval(interval);
   }, []);
 
-  const featuredProducts = useMemo(() => products.slice(0, 4), [products]);
-  const totalViewers = liveSessions.reduce((t, s) => t + (s.viewerCount || 0), 0);
+  // Animation Variants
+  const fadeInUp = {
+    initial: { opacity: 0, y: 30 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6, ease: [0.33, 1, 0.68, 1] }
+  };
+
+  const stagger = {
+    animate: { transition: { staggerChildren: 0.1 } }
+  };
 
   return (
-    <div className="min-h-screen bg-white text-black font-sans">
-      {/* ════════ Navbar ════════ */}
-      <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex h-[72px] max-w-[1280px] items-center justify-between px-6">
-          <span className="text-xl font-bold tracking-tight">ZoopIn</span>
+    <div className="min-h-screen bg-white font-['Spline_Sans'] selection:bg-black selection:text-white overflow-x-hidden">
 
-          <div className="flex items-center gap-3">
+      {/* ─── NAVIGATION ─── */}
+      <nav className="fixed top-0 z-[100] w-full border-b-[3px] border-black bg-white/80 backdrop-blur-md px-4 py-3 md:px-6 md:py-4">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => navigate('/')}
+          >
+            <div className="bg-black p-1.5 rounded-lg shadow-[3px_3px_0px_0px_rgba(244,255,0,1)]">
+              <Zap className="text-zoop-yellow fill-zoop-yellow" size={20} />
+            </div>
+            <span className="text-xl md:text-2xl font-black tracking-tighter uppercase italic">ZoopIn</span>
+          </motion.div>
+
+          <div className="flex items-center gap-3 md:gap-6">
+            <button
+              className="hidden text-xs md:text-sm font-black uppercase tracking-tight lg:block hover:text-zoop-yellow transition-colors"
+              onClick={() => navigate('/register?role=shop_owner')}
+            >
+              Become a Seller
+            </button>
+
             {user ? (
-              <>
-                <button
-                  type="button"
+              <div className="flex gap-2">
+                <motion.button
+                  whileTap={{ y: 2, x: 2, boxShadow: 'none' }}
                   onClick={() => navigate(getDefaultRouteForRole(user.role))}
-                  className="rounded-full bg-brand-yellow px-4 py-2 text-sm font-semibold text-black border border-black/10 transition hover:brightness-105"
+                  className="bg-zoop-yellow border-2 border-black px-4 py-1.5 md:px-6 md:py-2 text-xs md:text-sm font-black uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                 >
-                  Open {user.role === 'shop_owner' ? 'studio' : user.role === 'admin' ? 'admin' : 'dashboard'}
-                </button>
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800"
-                >
-                  Sign out
-                </button>
-              </>
+                  Studio
+                </motion.button>
+                <button onClick={logout} className="bg-black px-4 py-1.5 text-xs md:text-sm font-black uppercase text-white">Exit</button>
+              </div>
             ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => navigate('/login')}
-                  className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800"
-                >
-                  Log in
-                </button>
-                <button
-                  type="button"
+              <div className="flex gap-2">
+                <button onClick={() => navigate('/login')} className="hidden sm:block px-4 py-2 text-xs md:text-sm font-black uppercase">Log In</button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98, boxShadow: 'none', x: 2, y: 2 }}
                   onClick={() => navigate('/register')}
-                  className="rounded-full bg-brand-yellow px-4 py-2 text-sm font-semibold text-black border border-black/10 transition hover:brightness-105"
+                  className="bg-zoop-yellow border-2 border-black px-5 py-2 text-xs md:text-sm font-black uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                 >
-                  Sign up
-                </button>
-              </>
+                  Join Now
+                </motion.button>
+              </div>
             )}
           </div>
         </div>
       </nav>
 
-      {/* ════════ Hero Section ════════ */}
-      <section className="relative overflow-hidden bg-brand-yellow">
-        <div className="mx-auto grid max-w-[1280px] gap-12 px-6 py-20 lg:grid-cols-2 lg:items-center lg:py-24">
-          {/* Left content */}
-          <div className="max-w-[600px]">
-            <p className="text-sm font-semibold uppercase tracking-widest text-black/60">
-              Live Commerce Platform
-            </p>
-            <h1 className="mt-4 text-[44px] font-bold leading-[1.15] text-black lg:text-[56px]">
-              Shop live.<br />React live.<br />Sell live.
-            </h1>
-            <p className="mt-5 text-lg leading-relaxed text-gray-800">
-              Watch sellers demonstrate products in real time, ask questions on the spot,
-              react instantly, and never miss a live deal again.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <button
-                type="button"
-                onClick={() => navigate('/feed')}
-                className="inline-flex items-center gap-2 rounded-lg bg-brand-blue px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-blue-hover"
-              >
-                <PlayCircle size={18} />
-                Browse live streams
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/register?role=shop_owner')}
-                className="rounded-full border border-black px-5 py-3 text-sm font-medium text-black transition hover:bg-black hover:text-white"
-              >
-                Start selling live
-              </button>
-            </div>
-          </div>
+      {/* ─── HERO SECTION ─── */}
+      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zoop-yellow pt-20">
+        {/* Animated Background Shapes */}
+        <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
+          <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute -top-20 -left-20 text-black"><Zap size={400} /></motion.div>
+          <motion.div animate={{ y: [0, 50, 0] }} transition={{ duration: 5, repeat: Infinity }} className="absolute top-1/2 -right-20 text-black"><Sparkles size={300} /></motion.div>
+        </div>
 
-          {/* Right — stats + live preview */}
-          <div className="relative">
-            <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-card-lg">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                {[
-                  { label: 'Live now', value: liveSessions.length, color: 'text-red-500' },
-                  { label: 'Products', value: products.length, color: 'text-brand-blue' },
-                  { label: 'Viewers', value: totalViewers, color: 'text-black' },
-                ].map((stat) => (
-                  <div key={stat.label} className="rounded-xl bg-gray-50 p-4">
-                    <p className={`text-3xl font-bold ${stat.color}`}>{stat.value}</p>
-                    <p className="mt-1 text-xs font-medium uppercase tracking-wider text-gray-500">
-                      {stat.label}
-                    </p>
-                  </div>
-                ))}
+        <div className="mx-auto grid max-w-[1400px] gap-12 px-6 lg:grid-cols-2 lg:items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -100 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "circOut" }}
+            className="z-10 space-y-6 text-center lg:text-left"
+          >
+            <div className="inline-block border-2 border-black bg-white px-3 py-1 text-xs font-black uppercase tracking-widest shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              🚀 The Future of Shopping
+            </div>
+            <h1 className="text-[50px] font-black leading-[0.85] tracking-tighter text-black sm:text-[80px] md:text-[100px] lg:text-[110px]">
+              LIVE <br className="hidden md:block" />
+              <span className="text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">MARKET</span> <br />
+              DROPS.
+            </h1>
+            <p className="mx-auto lg:mx-0 max-w-[450px] text-lg md:text-xl font-bold leading-tight text-black/80">
+              Stop scrolling, start winning. Real-time auctions, verified grails, and pure vibes.
+            </p>
+
+            <div className="flex flex-col gap-4 pt-4 sm:flex-row sm:justify-center lg:justify-start">
+              <motion.button
+                whileHover={{ scale: 1.05, rotate: -1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/feed')}
+                className="group flex h-[70px] md:h-[80px] items-center justify-center gap-3 bg-black px-10 text-lg md:text-xl font-black uppercase tracking-tight text-white shadow-[8px_8px_0px_0px_rgba(255,255,255,0.3)] transition-all"
+              >
+                Enter Feed <ArrowRight className="group-hover:translate-x-2 transition-transform" />
+              </motion.button>
+
+              <div className="flex items-center justify-center gap-4 border-2 border-black bg-white p-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+                <QrCode size={50} />
+                <div className="text-left leading-none">
+                  <p className="text-[10px] font-black uppercase">App Beta</p>
+                  <p className="mt-1 text-[10px] font-bold text-black/40 uppercase">Scan to Join</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* DASHING PHONE MOCKUP */}
+          <motion.div
+            initial={{ opacity: 0, y: 100, rotate: 5 }}
+            animate={{ opacity: 1, y: 0, rotate: -2 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="relative hidden lg:block"
+          >
+            <div className="relative mx-auto h-[620px] w-[310px] rounded-[3rem] border-[10px] border-black bg-zinc-900 shadow-[20px_20px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black" />
+              <motion.img
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 10, repeat: Infinity }}
+                src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2012"
+                className="h-full w-full object-cover opacity-80"
+              />
+
+              {/* Overlay Elements */}
+              <div className="absolute top-8 left-6 right-6 flex justify-between items-center">
+                <div className="flex items-center gap-2 bg-red-600 px-2 py-0.5 rounded text-[10px] font-black text-white animate-pulse">
+                  LIVE
+                </div>
+                <div className="bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-full text-white text-[10px] font-bold flex items-center gap-1">
+                  <Eye size={12} /> 1.8k
+                </div>
               </div>
 
-              {liveSessions.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => navigate('/feed')}
-                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-black py-3 text-sm font-semibold text-white transition hover:bg-gray-800"
+              <div className="absolute bottom-10 left-6 right-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full border-2 border-zoop-yellow overflow-hidden bg-white">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Herin" alt="host" />
+                  </div>
+                  <div>
+                    <p className="text-white font-black text-xs">Herin Soni</p>
+                    <p className="text-zoop-yellow text-[10px] font-bold uppercase">Grail Sneakers</p>
+                  </div>
+                </div>
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 1 }}
+                  className="bg-white border-2 border-black p-2 flex items-center gap-3 shadow-[4px_4px_0px_0px_rgba(244,255,0,1)]"
                 >
-                  <PlayCircle size={16} />
-                  Watch live feed
-                  <ArrowRight size={14} />
-                </button>
-              )}
+                  <div className="h-10 w-10 bg-zinc-100 flex items-center justify-center">
+                    <Sparkles size={16} className="text-zinc-400" />
+                  </div>
+                  <div className="leading-none">
+                    <p className="text-[10px] font-black uppercase">AJ1 Retro High</p>
+                    <p className="text-blue-600 font-black text-sm">₹22,500</p>
+                  </div>
+                  <div className="ml-auto bg-black p-1 text-white">
+                    <ArrowRight size={14} />
+                  </div>
+                </motion.div>
+              </div>
             </div>
-          </div>
+
+            {/* Floating Accessory Icons */}
+            <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 3, repeat: Infinity }} className="absolute -right-8 top-1/4 bg-white border-2 border-black p-3 shadow-lg">
+              <Store className="text-black" />
+            </motion.div>
+            <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 4, repeat: Infinity }} className="absolute -left-12 bottom-1/4 bg-zoop-yellow border-2 border-black p-4 shadow-lg rotate-12">
+              <Zap className="text-black fill-black" />
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      {/* ════════ How It Works (dark section) ════════ */}
-      <section className="bg-black py-20 text-white">
-        <div className="mx-auto max-w-[1280px] px-6">
-          <p className="text-sm font-semibold uppercase tracking-widest text-brand-yellow">
-            How it works
-          </p>
-          <h2 className="mt-4 text-[36px] font-bold leading-tight lg:text-[44px]">
-            Three roles, one platform
-          </h2>
-          <p className="mt-4 max-w-2xl text-lg text-gray-400">
-            Every live commerce experience flows through buyers, sellers, and admins working together in real time.
-          </p>
+      {/* ─── LIVE TICKER MARQUEE ─── */}
+      <div className="bg-black py-4 overflow-hidden border-y-4 border-black">
+        <motion.div
+          animate={{ x: [0, -1000] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="flex whitespace-nowrap gap-10"
+        >
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="flex items-center gap-4 text-white font-black italic uppercase text-2xl">
+              <span className="text-zoop-yellow">●</span> LIVE AUCTIONS NOW <span className="text-zoop-yellow">●</span> 0% SELLER FEES FOR 30 DAYS <span className="text-zoop-yellow">●</span> VERIFIED AUTHENTICITY
+            </div>
+          ))}
+        </motion.div>
+      </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {[
-              {
-                title: 'Buyer',
-                icon: <Users size={24} />,
-                description:
-                  'Scroll through live sessions, watch streams, react with emojis, and ask product questions in real time.',
-                accent: 'bg-brand-yellow text-black',
-              },
-              {
-                title: 'Shop Owner',
-                icon: <Store size={24} />,
-                description:
-                  'Upload products, create sessions with thumbnails, go live with your camera, and manage the showcase.',
-                accent: 'bg-brand-blue text-white',
-              },
-              {
-                title: 'Admin',
-                icon: <ShieldCheck size={24} />,
-                description:
-                  'Monitor all live sessions, moderate questions, track analytics, and manage platform health.',
-                accent: 'bg-white text-black',
-              },
-            ].map((card) => (
-              <div
-                key={card.title}
-                className="group rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
-              >
-                <div className={`inline-flex rounded-xl p-3 ${card.accent}`}>{card.icon}</div>
-                <h3 className="mt-5 text-xl font-bold">{card.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-gray-400">{card.description}</p>
+      {/* ─── LIVE NOW GRID ─── */}
+      <section className="bg-white py-24 px-6">
+        <div className="mx-auto max-w-[1400px]">
+          <motion.div
+            {...fadeInUp}
+            className="flex flex-col md:flex-row items-center justify-between gap-6 border-b-[6px] border-black pb-10 mb-16"
+          >
+            <div className="text-center md:text-left">
+              <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter">Live <span className="bg-black text-white px-4">Now</span></h2>
+              <p className="mt-4 font-bold text-black/50 uppercase tracking-[0.2em] flex items-center justify-center md:justify-start gap-2">
+                <span className="h-2 w-2 rounded-full bg-red-600 animate-ping" /> Real-time action
+              </p>
+            </div>
+            <motion.button
+              whileHover={{ x: 10 }}
+              onClick={() => navigate('/feed')}
+              className="group flex items-center gap-4 text-2xl font-black uppercase underline decoration-zoop-yellow decoration-[8px] underline-offset-8"
+            >
+              View Feed <ArrowRight size={32} />
+            </motion.button>
+          </motion.div>
+
+          <motion.div
+            variants={stagger}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+            className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {isLoading ? (
+              [1, 2, 3].map(i => <div key={i} className="aspect-[3/4] bg-zinc-100 border-4 border-black animate-pulse shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]" />)
+            ) : liveSessions.length > 0 ? (
+              liveSessions.map((session) => (
+                <motion.div
+                  key={session._id}
+                  variants={fadeInUp}
+                  whileHover={{ y: -10, rotate: 1 }}
+                  className="group relative cursor-pointer border-4 border-black bg-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all active:shadow-none active:translate-x-1 active:translate-y-1 overflow-hidden"
+                  onClick={() => navigate(`/live/${session.roomId}`)}
+                >
+                  <div className="relative aspect-[3/4] overflow-hidden border-b-4 border-black">
+                    <img
+                      src={session.thumbnail || session.currentProduct?.images?.[0] || 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800'}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      alt={session.title}
+                    />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="bg-zoop-yellow p-4 rounded-full border-2 border-black">
+                        <Play fill="black" size={24} />
+                      </div>
+                    </div>
+                    <div className="absolute top-4 left-4 bg-red-600 border-2 border-black px-3 py-1 text-xs font-black italic text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">LIVE</div>
+                  </div>
+                  <div className="p-6">
+                    <p className="text-xs font-black uppercase text-black/40">@{session.hostName || 'Seller'}</p>
+                    <h3 className="mt-1 text-2xl font-black uppercase leading-tight tracking-tighter truncate">{session.title}</h3>
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="flex items-center gap-1 text-xs font-bold uppercase"><Users size={14} /> 120 Watching</span>
+                      <div className="h-8 w-8 rounded-full border-2 border-black flex items-center justify-center hover:bg-zoop-yellow transition-colors">
+                        <ArrowRight size={16} />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full py-20 text-center border-4 border-dashed border-black">
+                <p className="text-2xl font-black uppercase opacity-20 italic">No live sessions at the moment.</p>
               </div>
+            )}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── DASHING FEATURES ─── */}
+      <section className="bg-zoop-yellow py-24 px-6 border-y-[6px] border-black">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="text-center mb-20">
+            <h2 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter">The <span className="text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">Zoop</span> Way.</h2>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {[
+              { title: 'Shop Live', icon: <Users size={48} />, text: 'Chat, react, and bid in real-time. No more static images.', bg: 'bg-white' },
+              { title: 'Sell Fast', icon: <Store size={48} />, text: 'Turn your inventory into cash in minutes, not days.', bg: 'bg-white' },
+              { title: 'Trust First', icon: <ShieldCheck size={48} />, text: 'Every seller is vetted. Every transaction is locked.', bg: 'bg-white' },
+            ].map((f, i) => (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ rotate: i % 2 === 0 ? 1 : -1 }}
+                className={`${f.bg} border-4 border-black p-10 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] group`}
+              >
+                <div className="mb-8 h-20 w-20 bg-zoop-yellow border-4 border-black flex items-center justify-center group-hover:scale-110 transition-transform">
+                  {f.icon}
+                </div>
+                <h3 className="text-3xl font-black uppercase mb-4 tracking-tighter italic">{f.title}</h3>
+                <p className="font-bold text-black/60 text-lg leading-snug">{f.text}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ════════ Live Sessions Grid ════════ */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-[1280px] px-6">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-widest text-gray-400">
-                Live right now
-              </p>
-              <h2 className="mt-2 text-[32px] font-bold text-black">Active sessions</h2>
-            </div>
-            {liveSessions.length > 0 && (
-              <button
-                type="button"
-                onClick={() => navigate('/feed')}
-                className="inline-flex items-center gap-2 rounded-lg bg-brand-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-blue-hover"
-              >
-                Open feed <ArrowRight size={14} />
-              </button>
-            )}
-          </div>
-
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {liveSessions.map((session) => {
-              const image =
-                session.thumbnail || session.currentProduct?.images?.[0] || '';
-              return (
-                <div
-                  key={session._id}
-                  className="group cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-white shadow-card transition hover:shadow-card-lg hover:border-gray-300"
-                  onClick={() => navigate(`/live/${session.roomId}`)}
-                >
-                  <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
-                    {image ? (
-                      <img
-                        src={image}
-                        alt={session.title}
-                        className="h-full w-full object-cover transition group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-brand-yellow/20 to-brand-blue/10">
-                        <ShoppingBag size={40} className="text-gray-300" />
-                      </div>
-                    )}
-
-                    <div className="absolute left-3 top-3 flex items-center gap-2">
-                      <span className="rounded bg-red-500 px-2 py-0.5 text-[11px] font-bold text-white">
-                        LIVE
-                      </span>
-                    </div>
-
-                    <div className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/50 px-2 py-1 text-[11px] text-white backdrop-blur-sm">
-                      <Eye size={12} />
-                      {session.viewerCount || 0}
-                    </div>
-
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-brand-yellow">
-                        {session.hostName || session.hostId?.split('@')[0] || 'Live seller'}
-                      </p>
-                      <p className="mt-1 text-sm font-bold text-white line-clamp-2">
-                        {session.title}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="p-4">
-                    <p className="text-xs text-gray-500">
-                      {session.currentProduct?.name || 'Stream in progress'}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-
-            {!isLoading && liveSessions.length === 0 && (
-              <div className="col-span-full rounded-xl border-2 border-dashed border-gray-200 p-12 text-center">
-                <PlayCircle size={40} className="mx-auto text-gray-300" />
-                <p className="mt-4 font-semibold text-gray-600">No live sessions right now</p>
-                <p className="mt-2 text-sm text-gray-400">
-                  When a seller goes live, their stream will appear here.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+      {/* ─── MOBILE CTA ─── */}
+      <section className="bg-black py-20 px-6 text-center text-white">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          className="mx-auto max-w-4xl"
+        >
+          <h2 className="text-5xl md:text-7xl font-black uppercase italic leading-[0.9] mb-10">Ready to <br /> <span className="text-zoop-yellow">Join the Hype?</span></h2>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/register')}
+            className="bg-zoop-yellow text-black border-2 border-white px-12 py-6 text-2xl font-black uppercase italic shadow-[8px_8px_0px_0px_rgba(255,255,255,1)]"
+          >
+            Get Started Now
+          </motion.button>
+        </motion.div>
       </section>
 
-      {/* ════════ Featured Products ════════ */}
-      {featuredProducts.length > 0 && (
-        <section className="border-t border-gray-100 bg-gray-50 py-20">
-          <div className="mx-auto max-w-[1280px] px-6">
-            <p className="text-sm font-semibold uppercase tracking-widest text-gray-400">
-              Product catalog
-            </p>
-            <h2 className="mt-2 text-[32px] font-bold text-black">Featured products</h2>
-
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {featuredProducts.map((product) => (
-                <div
-                  key={product._id}
-                  className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-soft transition hover:shadow-card"
-                >
-                  <div className="aspect-square overflow-hidden bg-gray-100">
-                    {product.images?.[0] ? (
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        className="h-full w-full object-cover transition hover:scale-105"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-gray-300">
-                        <ShoppingBag size={32} />
-                      </div>
-                    )}
+      {/* ─── FOOTER ─── */}
+      <footer className="bg-white py-20 px-6 border-t-[6px] border-black">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="grid gap-16 md:grid-cols-4">
+            <div className="col-span-2">
+              <span className="text-6xl font-black italic tracking-tighter uppercase">ZoopIn</span>
+              <p className="mt-6 max-w-sm text-xl font-bold text-black/60 italic">
+                Built for the community, <br /> by the community.
+              </p>
+              <div className="mt-8 flex gap-4">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="h-12 w-12 border-2 border-black flex items-center justify-center hover:bg-zoop-yellow cursor-pointer transition-colors">
+                    <Zap size={20} />
                   </div>
-                  <div className="p-4">
-                    <p className="text-sm font-semibold text-black">{product.name}</p>
-                    <p className="mt-1 text-lg font-bold text-brand-blue">
-                      ₹{Number(product.price || 0).toFixed(2)}
-                    </p>
-                    <p className="mt-2 line-clamp-2 text-xs text-gray-500">
-                      {product.description || 'No description added.'}
-                    </p>
-                    <div className="mt-3 flex items-center justify-between text-[11px] uppercase tracking-wider text-gray-400">
-                      <span>{product.category || 'General'}</span>
-                      <span>{product.stock} in stock</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-sm font-black uppercase tracking-widest text-black/40 mb-6 underline decoration-zoop-yellow decoration-4 underline-offset-4">Platform</h4>
+              <ul className="space-y-4 font-black uppercase text-sm">
+                <li className="hover:translate-x-2 transition-transform cursor-pointer" onClick={() => navigate('/feed')}>Browse Feed</li>
+                <li className="hover:translate-x-2 transition-transform cursor-pointer" onClick={() => navigate('/register?role=shop_owner')}>Seller Portal</li>
+                <li className="hover:translate-x-2 transition-transform cursor-pointer">Safety Guidelines</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-black uppercase tracking-widest text-black/40 mb-6 underline decoration-zoop-yellow decoration-4 underline-offset-4">Legal</h4>
+              <ul className="space-y-4 font-black uppercase text-sm">
+                <li className="hover:translate-x-2 transition-transform cursor-pointer">Terms of Service</li>
+                <li className="hover:translate-x-2 transition-transform cursor-pointer">Privacy Policy</li>
+                <li className="hover:translate-x-2 transition-transform cursor-pointer">Cookie Policy</li>
+              </ul>
             </div>
           </div>
-        </section>
-      )}
-
-      {/* ════════ Footer ════════ */}
-      <footer className="bg-black py-16 text-white">
-        <div className="mx-auto grid max-w-[1280px] gap-12 px-6 md:grid-cols-3">
-          <div>
-            <span className="text-xl font-bold">ZoopIn</span>
-            <p className="mt-4 text-sm leading-relaxed text-gray-400">
-              The live commerce platform for real-time product demos, instant reactions, and interactive shopping.
-            </p>
+          <div className="mt-20 border-t-4 border-black pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-sm font-black uppercase">© {new Date().getFullYear()} ZoopIn INC.</p>
+            <p className="text-sm font-black uppercase italic text-black/40">Powered by Hype Engine 1.0</p>
           </div>
-
-          <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-gray-400">Platform</h4>
-            <ul className="mt-4 space-y-3 text-sm text-gray-300">
-              <li>
-                <button type="button" onClick={() => navigate('/feed')} className="hover:text-white transition">
-                  Live feed
-                </button>
-              </li>
-              <li>
-                <button type="button" onClick={() => navigate('/register?role=shop_owner')} className="hover:text-white transition">
-                  Become a seller
-                </button>
-              </li>
-              <li>
-                <button type="button" onClick={() => navigate('/login?role=admin')} className="hover:text-white transition">
-                  Admin login
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-gray-400">Built by</h4>
-            <ul className="mt-4 space-y-3 text-sm text-gray-300">
-              <li>
-                <a href="https://herin.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
-                  Herin Soni
-                </a>
-              </li>
-              <li>
-                <a href="https://github.com/herin7/ZoopIn" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
-                  GitHub
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mx-auto mt-12 max-w-[1280px] border-t border-white/10 px-6 pt-6">
-          <p className="text-xs text-gray-500">© {new Date().getFullYear()} ZoopIn. All rights reserved.</p>
         </div>
       </footer>
     </div>
