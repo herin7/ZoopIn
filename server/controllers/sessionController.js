@@ -18,6 +18,41 @@ const parseProducts = (value) => {
   return [];
 };
 
+const normalizeOptionalString = (value) => {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value.trim();
+};
+
+const ensureSessionAccess = (session, user) => {
+  if (!session) {
+    return {
+      allowed: false,
+      statusCode: 404,
+      message: 'Session not found',
+    };
+  }
+
+  if (user?.role === 'admin') {
+    return { allowed: true };
+  }
+
+  if (user?.role === 'shop_owner' && session.hostId === user.email) {
+    return { allowed: true };
+  }
+
+  return {
+    allowed: false,
+    statusCode: 403,
+    message: 'You do not have access to this session',
+  };
+};
+
+const populateSessionQuery = (query) =>
+  query.populate('products.productId').populate('currentProduct');
+
 const createSession = async (req, res, next) => {
   try {
     const products = parseProducts(req.body.products);
@@ -38,7 +73,10 @@ const createSession = async (req, res, next) => {
 
     const session = new LiveSession({
       title: req.body.title,
-      hostId: req.body.hostId,
+      hostId: req.user?.email || req.body.hostId,
+      hostName: req.user?.name || req.body.hostName || '',
+      description: normalizeOptionalString(req.body.description),
+      thumbnail: normalizeOptionalString(req.body.thumbnail),
       roomId: `session_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`,
       products,
       currentProduct: products?.[0]?.productId ?? null,
@@ -55,11 +93,58 @@ const createSession = async (req, res, next) => {
   }
 };
 
+const getManagedSessions = async (req, res, next) => {
+  try {
+    const filters = {};
+
+    if (req.user?.role === 'shop_owner') {
+      filters.hostId = req.user.email;
+    }
+
+    if (req.query.status) {
+      filters.status = req.query.status;
+    }
+
+    const sessions = await populateSessionQuery(
+      LiveSession.find(filters).sort({ createdAt: -1, startedAt: -1 })
+    );
+
+    return res.json({
+      success: true,
+      data: sessions,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const getLiveSessions = async (req, res, next) => {
+  try {
+    const requestedLimit = req.query.limit ? Number(req.query.limit) : null;
+    let liveSessionsQuery = populateSessionQuery(
+      LiveSession.find({ status: 'live' }).sort({ startedAt: -1 })
+    );
+
+    if (requestedLimit) {
+      liveSessionsQuery = liveSessionsQuery.limit(Math.min(requestedLimit, 50));
+    }
+
+    const sessions = await liveSessionsQuery;
+
+    return res.json({
+      success: true,
+      data: sessions,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 const getSessionByRoomId = async (req, res, next) => {
   try {
-    const session = await LiveSession.findOne({ roomId: req.params.roomId })
-      .populate('products.productId')
-      .populate('currentProduct');
+    const session = await populateSessionQuery(
+      LiveSession.findOne({ roomId: req.params.roomId })
+    );
 
     if (!session) {
       return res.status(404).json({ success: false, message: 'Session not found' });
@@ -77,9 +162,13 @@ const getSessionByRoomId = async (req, res, next) => {
 const startSession = async (req, res, next) => {
   try {
     const session = await LiveSession.findById(req.params.id);
+    const access = ensureSessionAccess(session, req.user);
 
-    if (!session) {
-      return res.status(404).json({ success: false, message: 'Session not found' });
+    if (!access.allowed) {
+      return res.status(access.statusCode).json({
+        success: false,
+        message: access.message,
+      });
     }
 
     session.status = 'live';
@@ -104,9 +193,13 @@ const startSession = async (req, res, next) => {
 const endSession = async (req, res, next) => {
   try {
     const session = await LiveSession.findById(req.params.id);
+    const access = ensureSessionAccess(session, req.user);
 
-    if (!session) {
-      return res.status(404).json({ success: false, message: 'Session not found' });
+    if (!access.allowed) {
+      return res.status(access.statusCode).json({
+        success: false,
+        message: access.message,
+      });
     }
 
     session.status = 'ended';
@@ -125,6 +218,8 @@ const endSession = async (req, res, next) => {
 
 module.exports = {
   createSession,
+  getManagedSessions,
+  getLiveSessions,
   getSessionByRoomId,
   startSession,
   endSession,

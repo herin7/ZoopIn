@@ -224,6 +224,7 @@ module.exports = (io) => {
           roomId,
           sessionId: roomState.sessionId,
           viewerCount: roomState.viewerSockets.size,
+          viewerIds: Array.from(roomState.viewerSockets),
         });
 
         await emitCurrentSessionState(io, socket, roomState, session);
