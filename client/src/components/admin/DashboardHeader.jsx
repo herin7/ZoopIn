@@ -17,6 +17,15 @@ const DashboardHeader = ({ roleLabel, onLogout }) => {
         <p className="max-w-2xl text-lg font-bold text-black/60 leading-tight">
           Create drops, blast the feed, and own the live marketplace.
         </p>
+
+        <a
+          href="https://www.mintlify.com/herin7/ZoopIn"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block mt-4 text-xs font-black uppercase tracking-tight text-black/40 hover:text-black transition-colors underline decoration-black/20 decoration-2 underline-offset-4"
+        >
+          View Documentation
+        </a>
       </div>
       <div className="flex items-center gap-3">
         <motion.a

@@ -71,6 +71,15 @@ const LandingPage = () => {
               </svg>
             </motion.a>
 
+            <a
+              href="https://www.mintlify.com/herin7/ZoopIn"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden text-xs md:text-sm font-black uppercase tracking-tight sm:block hover:text-zoop-yellow transition-colors underline decoration-black decoration-2 underline-offset-4"
+            >
+              Docs
+            </a>
+
             <button
               className="hidden text-xs md:text-sm font-black uppercase tracking-tight lg:block hover:text-zoop-yellow transition-colors"
               onClick={() => navigate('/register?role=shop_owner')}
