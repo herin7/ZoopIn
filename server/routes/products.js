@@ -8,7 +8,7 @@ const {
 } = require('../controllers/productController');
 const { upload, uploadToCloudinary } = require('../middleware/upload');
 const { validateRequest } = require('../middleware/validateRequest');
-const { verifyAdmin } = require('../middleware/verifyAdmin');
+const { verifyRoles } = require('../middleware/verifyAdmin');
 
 const router = express.Router();
 
@@ -69,7 +69,7 @@ router
     getProducts
   )
   .post(
-    verifyAdmin,
+    ...verifyRoles(['admin', 'shop_owner']),
     upload.array('images', 5),
     createProductValidation,
     validateRequest,
@@ -80,7 +80,7 @@ router
 router
   .route('/:id')
   .put(
-    verifyAdmin,
+    ...verifyRoles(['admin', 'shop_owner']),
     upload.array('images', 5),
     updateProductValidation,
     validateRequest,
@@ -88,7 +88,7 @@ router
     updateProduct
   )
   .delete(
-    verifyAdmin,
+    ...verifyRoles(['admin', 'shop_owner']),
     param('id').isMongoId().withMessage('Invalid product id'),
     validateRequest,
     deleteProduct

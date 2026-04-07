@@ -1,21 +1,52 @@
-import { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { ShieldCheck } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { ShieldCheck, Store, Users } from 'lucide-react';
 import api from '../lib/api';
+import { getDefaultRouteForRole } from '../lib/authRoutes';
 import { useAuthStore } from '../store/authStore';
 import { useToastStore } from '../store/toastStore';
 
+const ROLE_OPTIONS = [
+  {
+    id: 'buyer',
+    label: 'Buyer',
+    icon: <Users size={18} />,
+    description: 'Join live rooms, react in real time, and ask questions while shopping.',
+  },
+  {
+    id: 'shop_owner',
+    label: 'Shop Owner',
+    icon: <Store size={18} />,
+    description: 'Manage products, go live, and answer viewer questions.',
+  },
+  {
+    id: 'admin',
+    label: 'Admin',
+    icon: <ShieldCheck size={18} />,
+    description: 'Oversee live operations and platform sessions.',
+  },
+];
+
 const LoginPage = () => {
   const token = useAuthStore((state) => state.token);
+  const user = useAuthStore((state) => state.user);
   const setAuth = useAuthStore((state) => state.setAuth);
   const addToast = useToastStore((state) => state.addToast);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedRole = searchParams.get('role');
+  const initialRole = ROLE_OPTIONS.some((roleOption) => roleOption.id === requestedRole)
+    ? requestedRole
+    : 'buyer';
+  const [selectedRole, setSelectedRole] = useState(initialRole);
   const [formValues, setFormValues] = useState({ email: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  if (token) {
-    return <Navigate to="/admin" replace />;
+  const redirectPath = useMemo(() => getDefaultRouteForRole(selectedRole), [selectedRole]);
+
+  if (token && user) {
+    return <Navigate to={getDefaultRouteForRole(user.role)} replace />;
   }
 
   const handleSubmit = async (event) => {
@@ -23,14 +54,21 @@ const LoginPage = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await api.post('/api/auth/login', formValues);
+      const response = await api.post('/api/auth/login', {
+        ...formValues,
+        role: selectedRole,
+      });
       setAuth(response.data.data);
       addToast({
         title: 'Welcome back',
-        message: 'Admin session started successfully.',
+        message: {
+          admin: 'Admin access granted.',
+          shop_owner: 'Shop owner access granted.',
+          buyer: 'Buyer access granted.',
+        }[selectedRole],
         tone: 'success',
       });
-      navigate(location.state?.from || '/admin', { replace: true });
+      navigate(location.state?.from || redirectPath, { replace: true });
     } catch (error) {
       addToast({
         title: 'Login failed',
@@ -42,62 +80,129 @@ const LoginPage = () => {
     }
   };
 
+  const handleRoleChange = (role) => {
+    setSelectedRole(role);
+    setSearchParams({ role });
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-950 px-4 text-white">
-      <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-gray-900/90 p-8 shadow-2xl shadow-black/40 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
-          <div className="rounded-2xl bg-emerald-500/15 p-3 text-emerald-300">
-            <ShieldCheck size={28} />
-          </div>
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-emerald-300/80">Admin Access</p>
-            <h1 className="text-2xl font-semibold">Sign in to control the stream</h1>
+      <div className="w-full max-w-4xl overflow-hidden rounded-[2rem] border border-white/10 bg-gray-900/90 shadow-2xl shadow-black/40 backdrop-blur-sm lg:grid lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="border-b border-white/10 bg-gray-950/70 p-8 lg:border-b-0 lg:border-r">
+          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">ZoopIn Access</p>
+          <h1 className="mt-3 text-3xl font-semibold">Choose your control flow</h1>
+          <p className="mt-3 text-sm text-gray-400">
+            Buyers join live shopping rooms. Shop owners run live selling sessions. Admins supervise platform activity.
+          </p>
+
+          <div className="mt-8 space-y-3">
+            {ROLE_OPTIONS.map((roleOption) => (
+              <button
+                key={roleOption.id}
+                type="button"
+                onClick={() => handleRoleChange(roleOption.id)}
+                className={`flex w-full items-start gap-3 rounded-[1.5rem] border p-4 text-left transition ${
+                  selectedRole === roleOption.id
+                    ? 'border-emerald-400/50 bg-emerald-500/10'
+                    : 'border-white/10 bg-gray-900/70 hover:border-white/20'
+                }`}
+              >
+                <div className="rounded-2xl bg-white/5 p-3 text-emerald-300">{roleOption.icon}</div>
+                <div>
+                  <p className="font-medium text-white">{roleOption.label}</p>
+                  <p className="mt-1 text-sm text-gray-400">{roleOption.description}</p>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
 
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+        <div className="p-8">
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-300">Email</label>
-            <input
-              type="email"
-              required
-              value={formValues.email}
-              onChange={(event) =>
-                setFormValues((currentValues) => ({
-                  ...currentValues,
-                  email: event.target.value,
-                }))
-              }
-              className="w-full rounded-2xl border border-white/10 bg-gray-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400"
-              placeholder="admin@example.com"
-            />
+            <p className="text-sm uppercase tracking-[0.3em] text-gray-500">Sign In</p>
+            <h2 className="mt-2 text-2xl font-semibold">
+              {{
+                admin: 'Admin login',
+                shop_owner: 'Shop owner login',
+                buyer: 'Buyer login',
+              }[selectedRole]}
+            </h2>
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-300">Password</label>
-            <input
-              type="password"
-              required
-              value={formValues.password}
-              onChange={(event) =>
-                setFormValues((currentValues) => ({
-                  ...currentValues,
-                  password: event.target.value,
-                }))
-              }
-              className="w-full rounded-2xl border border-white/10 bg-gray-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400"
-              placeholder="Enter your admin password"
-            />
-          </div>
+          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-300">Email</label>
+              <input
+                type="email"
+                required
+                value={formValues.email}
+                onChange={(event) =>
+                  setFormValues((currentValues) => ({
+                    ...currentValues,
+                    email: event.target.value,
+                  }))
+                }
+                className="w-full rounded-2xl border border-white/10 bg-gray-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400"
+                placeholder={
+                  {
+                    admin: 'admin@example.com',
+                    shop_owner: 'owner@example.com',
+                    buyer: 'buyer@example.com',
+                  }[selectedRole]
+                }
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-gray-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-700"
-          >
-            {isSubmitting ? 'Signing in...' : 'Sign in'}
-          </button>
-        </form>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-300">Password</label>
+              <input
+                type="password"
+                required
+                value={formValues.password}
+                onChange={(event) =>
+                  setFormValues((currentValues) => ({
+                    ...currentValues,
+                    password: event.target.value,
+                  }))
+                }
+                className="w-full rounded-2xl border border-white/10 bg-gray-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400"
+                placeholder="Enter your password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-gray-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-700"
+            >
+              {isSubmitting
+                ? 'Signing in...'
+                : `Continue as ${
+                  {
+                    admin: 'admin',
+                    shop_owner: 'shop owner',
+                    buyer: 'buyer',
+                  }[selectedRole]
+                }`}
+            </button>
+          </form>
+
+          <div className="mt-6 text-sm text-gray-400">
+            {selectedRole === 'admin' ? (
+              <p>Admin accounts are managed separately.</p>
+            ) : (
+              <p>
+                Need an account?{' '}
+                <Link
+                  to={`/register?role=${selectedRole}`}
+                  className="font-medium text-emerald-300 hover:text-emerald-200"
+                >
+                  Register here
+                </Link>
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

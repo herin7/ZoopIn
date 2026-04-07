@@ -10,6 +10,7 @@ const analyticsRoutes = require('./routes/analytics');
 const authRoutes = require('./routes/auth');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 const socketHandlers = require('./socket/socketHandlers');
+const { ensureDefaultUsers } = require('./utils/seedDefaultUsers');
 
 const app = express();
 const server = http.createServer(app);
@@ -45,10 +46,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-mongoose.connect(
-  process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/live-commerce'
-);
-
 socketHandlers(io);
 
 app.use('/api/auth', authRoutes);
@@ -60,6 +57,21 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
+const startServer = async () => {
+  try {
+    await mongoose.connect(
+      process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/live-commerce'
+    );
+    await ensureDefaultUsers();
+
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server', error);
+    process.exit(1);
+  }
+};
+
+startServer();

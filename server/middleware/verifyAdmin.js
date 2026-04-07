@@ -1,31 +1,52 @@
 const jwt = require('jsonwebtoken');
 
-const verifyAdmin = (req, res, next) => {
-  try {
-    const authorizationHeader = req.headers.authorization || '';
+const getTokenFromRequest = (req) => {
+  const authorizationHeader = req.headers.authorization || '';
 
-    if (!authorizationHeader.startsWith('Bearer ')) {
+  if (!authorizationHeader.startsWith('Bearer ')) {
+    return null;
+  }
+
+  return authorizationHeader.split(' ')[1];
+};
+
+const requireAuth = (req, res, next) => {
+  try {
+    const token = getTokenFromRequest(req);
+
+    if (!token) {
       return res.status(401).json({
         success: false,
         message: 'Authorization token missing',
       });
     }
 
-    const token = authorizationHeader.split(' ')[1];
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-
-    if (decodedToken.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Admin access required',
-      });
-    }
-
-    req.user = decodedToken;
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
     return next();
   } catch (error) {
     return next(error);
   }
 };
 
-module.exports = { verifyAdmin };
+const verifyRoles = (allowedRoles = []) => [
+  requireAuth,
+  (req, res, next) => {
+    if (allowedRoles.length > 0 && !allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to access this resource',
+      });
+    }
+
+    return next();
+  },
+];
+
+const verifyAdmin = verifyRoles(['admin']);
+
+module.exports = {
+  getTokenFromRequest,
+  requireAuth,
+  verifyRoles,
+  verifyAdmin,
+};

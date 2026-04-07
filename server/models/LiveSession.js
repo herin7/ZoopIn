@@ -4,6 +4,9 @@ const liveSessionSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
     hostId: { type: String, trim: true },
+    hostName: { type: String, trim: true, default: '' },
+    description: { type: String, trim: true, default: '' },
+    thumbnail: { type: String, trim: true, default: '' },
     status: {
       type: String,
       enum: ['scheduled', 'live', 'ended'],
@@ -22,6 +25,7 @@ const liveSessionSchema = new mongoose.Schema(
     roomId: { type: String, unique: true, required: true, trim: true },
   },
   {
+    timestamps: true,
     versionKey: false,
   }
 );
