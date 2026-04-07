@@ -123,8 +123,9 @@ export const useWebRTC = (socket, roomId, sessionId) => {
       return undefined;
     }
 
-    const handleHostJoined = ({ viewerCount: currentViewerCount = 0 }) => {
+    const handleHostJoined = async ({ viewerCount: currentViewerCount = 0, viewerIds = [] }) => {
       setViewerCount(currentViewerCount);
+      await Promise.allSettled(viewerIds.map((viewerId) => createOfferForViewer(viewerId)));
     };
 
     const handleViewerJoin = async ({ viewerId, viewerCount: currentViewerCount }) => {

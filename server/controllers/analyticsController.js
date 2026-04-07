@@ -12,6 +12,13 @@ const getSessionAnalytics = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Session not found' });
     }
 
+    if (req.user?.role === 'shop_owner' && session.hostId !== req.user.email) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have access to this session analytics',
+      });
+    }
+
     const analytics = await Analytics.find({ sessionId }).sort({ timestamp: 1 });
     const reactionAggregate = await Reaction.aggregate([
       { $match: { sessionId: session._id } },

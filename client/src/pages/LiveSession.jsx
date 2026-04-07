@@ -9,7 +9,7 @@ import { useSessionStore } from '../store/sessionStore';
 import { useReactionStore } from '../store/reactionStore';
 
 const userId = `user-${Math.floor(Math.random() * 10000)}`;
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
+const SERVER_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const LiveSession = () => {
   const { roomId } = useParams();
