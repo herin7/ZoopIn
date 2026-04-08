@@ -1,7 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { getCurrentUser, loginUser, registerUser } = require('../controllers/authController');
-const { requireAuth } = require('../middleware/verifyAdmin');
+const { getCurrentUser, loginUser, registerUser, getAllUsers, updateUser, deleteUser } = require('../controllers/authController');
+const { requireAuth, verifyAdmin } = require('../middleware/verifyAdmin');
 const { validateRequest } = require('../middleware/validateRequest');
 
 const router = express.Router();
@@ -13,8 +13,8 @@ router.post(
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
   body('role')
     .optional()
-    .isIn(['buyer', 'shop_owner'])
-    .withMessage('Role must be buyer or shop_owner'),
+    .isIn(['buyer', 'shop_owner', 'admin'])
+    .withMessage('Role must be buyer, shop_owner or admin'),
   validateRequest,
   registerUser
 );
@@ -32,5 +32,10 @@ router.post(
 );
 
 router.get('/me', requireAuth, getCurrentUser);
+
+// Admin routes for user management
+router.get('/users', verifyAdmin, getAllUsers);
+router.put('/users/:id', verifyAdmin, updateUser);
+router.delete('/users/:id', verifyAdmin, deleteUser);
 
 module.exports = router;

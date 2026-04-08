@@ -1,33 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BarChart3, Boxes, MessageSquareMore } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-
-import { useSocket } from '../hooks/useSocket';
-import { useWebRTC } from '../hooks/useWebRTC';
 import { useAuthStore } from '../store/authStore';
 import { useToastStore } from '../store/toastStore';
 import api from '../services/api';
-
 import DashboardHeader from '../components/admin/DashboardHeader';
-import SessionCreator from '../components/admin/SessionCreator';
-import SessionGrid from '../components/admin/SessionGrid';
-import StreamControls from '../components/admin/StreamControls';
-import ProductManager from '../components/admin/ProductManager';
-import QuestionPanel from '../components/admin/QuestionPanel';
-import AnalyticsDashboard from '../components/admin/AnalyticsDashboard';
-
-const TABS = [
-  { id: 'products', label: 'Products', icon: <Boxes size={18} /> },
-  { id: 'questions', label: 'Questions', icon: <MessageSquareMore size={18} /> },
-  { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
-];
-
-const EMPTY_SESSION_FORM = {
-  title: '',
-  description: '',
-  thumbnail: '',
-};
 
 const AdminDashboard = () => {
   const user = useAuthStore((state) => state.user);
@@ -35,184 +11,257 @@ const AdminDashboard = () => {
   const addToast = useToastStore((state) => state.addToast);
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('products');
-  const [sessionForm, setSessionForm] = useState(EMPTY_SESSION_FORM);
-  const [session, setSession] = useState(null);
-  const [managedSessions, setManagedSessions] = useState([]);
-  const [questions, setQuestions] = useState([]);
-  const [reactionCounts, setReactionCounts] = useState({
-    like: 0, fire: 0, heart: 0, wow: 0
-  });
-  const [isCreatingSession, setIsCreatingSession] = useState(false);
-  const [isLoadingSessions, setIsLoadingSessions] = useState(true);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editingUser, setEditingUser] = useState(null);
 
-  const { socket } = useSocket(session?.roomId, 'host');
-  const { localStream, startStream, stopStream, viewerCount } = useWebRTC(
-    socket,
-    session?.roomId,
-    session?._id
-  );
+  // Form states
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('buyer');
+  const [password, setPassword] = useState('');
 
-  const roleLabel = user?.role === 'admin' ? 'Admin' : 'Seller';
+  // Search & Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
 
-  const fetchManagedSessions = useCallback(async () => {
-    setIsLoadingSessions(true);
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const fetchUsers = async () => {
     try {
-      const response = await api.get('/api/sessions');
-      const sessions = response.data.data || [];
-      setManagedSessions(sessions);
-      if (!session && sessions.length > 0) {
-        setSession(sessions.find(s => s.status === 'live') || sessions[0]);
-      }
-    } catch (error) {
-      addToast({ title: 'Load Error', message: error.response?.data?.message, tone: 'error' });
+      setLoading(true);
+      const res = await api.get('/api/auth/users');
+      setUsers(res.data.data);
+    } catch (err) {
+      addToast({ title: 'Error', message: 'Failed to fetch users.', tone: 'error' });
     } finally {
-      setIsLoadingSessions(false);
+      setLoading(false);
     }
-  }, [addToast, session]);
+  };
 
   useEffect(() => {
-    fetchManagedSessions();
-  }, [fetchManagedSessions]);
+    fetchUsers();
+  }, []);
 
-  useEffect(() => {
-    if (!socket) return;
+  const openEditModal = (targetUser) => {
+    setEditingUser(targetUser);
+    setName(targetUser.name);
+    setEmail(targetUser.email);
+    setRole(targetUser.role);
+    setPassword('');
+  };
 
-    socket.on('session:state', ({ data }) => {
-      if (data?.session) {
-        setSession(data.session);
-        setManagedSessions(prev => prev.map(s => s._id === data.session._id ? data.session : s));
-      }
-      if (data?.questions) setQuestions(data.questions);
-      if (data?.reactionCounts) setReactionCounts(data.reactionCounts);
-    });
+  const closeEditModal = () => {
+    setEditingUser(null);
+  };
 
-    socket.on('question:new', q => setQuestions(prev => [q, ...prev]));
-    socket.on('question:answered', q => setQuestions(prev => prev.map(item => item._id === q._id ? q : item)));
-    socket.on('reaction:update', ({ counts }) => counts && setReactionCounts(counts));
-    socket.on('product:changed', ({ currentProduct }) => {
-      if (!currentProduct) return;
-      setSession(prev => prev ? { ...prev, currentProduct } : prev);
-    });
-
-    return () => {
-      socket.off('session:state');
-      socket.off('question:new');
-      socket.off('question:answered');
-      socket.off('reaction:update');
-      socket.off('product:changed');
-    };
-  }, [socket]);
-
-  const unansweredCount = useMemo(() => questions.filter(q => !q.isAnswered).length, [questions]);
-
-  const handleCreateSession = async (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    setIsCreatingSession(true);
     try {
-      const resp = await api.post('/api/sessions', sessionForm);
-      const created = resp.data.data;
-      setSession(created);
-      setManagedSessions(prev => [created, ...prev]);
-      setSessionForm(EMPTY_SESSION_FORM);
-      setQuestions([]);
-      setReactionCounts({ like: 0, fire: 0, heart: 0, wow: 0 });
-      addToast({ title: 'Session Ready', message: 'Ready for signal.', tone: 'success' });
-    } catch (error) {
-      addToast({ title: 'Creation Error', message: error.response?.data?.message, tone: 'error' });
-    } finally {
-      setIsCreatingSession(false);
+      await api.put(`/api/auth/users/${editingUser._id}`, { name, email, role, password });
+      addToast({ title: 'Success', message: 'User updated successfully.', tone: 'success' });
+      closeEditModal();
+      fetchUsers();
+    } catch (err) {
+      addToast({ title: 'Error', message: err.response?.data?.message || 'Update failed', tone: 'error' });
     }
   };
 
-  const handleMarkAnswered = (q) => {
-    if (socket && session) socket.emit('question:answer', { roomId: session.roomId, questionId: q._id });
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you confirm you want to delete this user? This action cannot be undone.')) return;
+    try {
+      await api.delete(`/api/auth/users/${id}`);
+      addToast({ title: 'Success', message: 'User deleted successfully.', tone: 'success' });
+      fetchUsers();
+    } catch (err) {
+      addToast({ title: 'Error', message: 'Failed to delete user.', tone: 'error' });
+    }
   };
 
-  const handleLogout = () => { logout(); navigate('/login'); };
+  const filteredUsers = users.filter(u => {
+    const searchLower = (searchQuery || '').toLowerCase();
+    const nameMatch = (u.name || '').toLowerCase().includes(searchLower);
+    const emailMatch = (u.email || '').toLowerCase().includes(searchLower);
+    const matchesSearch = nameMatch || emailMatch;
+    const matchesRole = roleFilter === 'all' || u.role === roleFilter;
+    return matchesSearch && matchesRole;
+  });
 
   return (
-    <div className="min-h-screen bg-white px-4 py-8 text-black md:px-8">
+    <div className="min-h-screen bg-zinc-50 px-4 py-8 text-black md:px-8">
       <div className="mx-auto max-w-7xl">
-
         <DashboardHeader
-          roleLabel={roleLabel}
+          roleLabel="Super Admin"
           onLogout={handleLogout}
         />
 
-        <SessionCreator
-          sessionForm={sessionForm}
-          setSessionForm={setSessionForm}
-          onSubmit={handleCreateSession}
-          isCreatingSession={isCreatingSession}
-          user={user}
-          roleLabel={roleLabel}
-        />
-
-        <SessionGrid
-          managedSessions={managedSessions}
-          activeSessionId={session?._id}
-          onSelectSession={setSession}
-          isLoadingSessions={isLoadingSessions}
-        />
-
-        <div className="grid gap-8 lg:grid-cols-5">
-          <div className="lg:col-span-3">
-            <StreamControls
-              session={session}
-              socket={socket}
-              localStream={localStream}
-              startStream={startStream}
-              stopStream={stopStream}
-              viewerCount={viewerCount}
-              onSessionChange={s => setSession(s)}
-            />
+        <div className="mt-8">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-black uppercase tracking-tight">User Management</h1>
+            <button onClick={() => navigate('/studio')} className="bg-black text-white px-4 py-2 font-bold hover:bg-zinc-800 transition">
+              Go to Live Studio 🎥
+            </button>
           </div>
 
-          <div className="lg:col-span-2">
-            <div className="border-[4px] border-black bg-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] flex flex-col h-full min-h-[600px]">
-              <div className="flex border-b-[4px] border-black">
-                {TABS.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 py-5 flex flex-col items-center justify-center gap-1 transition-colors relative ${activeTab === tab.id ? 'bg-zoop-yellow' : 'bg-white hover:bg-zinc-50'}`}
-                  >
-                    {tab.icon}
-                    <span className="text-[10px] font-black uppercase tracking-widest">{tab.label}</span>
-                    {tab.id === 'questions' && unansweredCount > 0 && (
-                      <span className="absolute top-2 right-2 h-5 w-5 bg-red-600 text-white text-[10px] font-black flex items-center justify-center border-2 border-black">
-                        {unansweredCount}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <input 
+              type="text" 
+              placeholder="Search by name or email..." 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="flex-1 border-4 border-black p-3 font-medium focus:outline-none focus:ring-2 focus:ring-zoop-yellow bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            />
+            <select 
+              value={roleFilter}
+              onChange={e => setRoleFilter(e.target.value)}
+              className="border-4 border-black p-3 font-black uppercase focus:outline-none focus:ring-2 focus:ring-zoop-yellow bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            >
+              <option value="all">All Roles</option>
+              <option value="buyer">Buyer</option>
+              <option value="shop_owner">Shop Owner</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
 
-              <div className="p-6 flex-1 overflow-y-auto">
-                <AnimatePresence mode="wait">
-                  <motion.div key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    {activeTab === 'products' && (
-                      <ProductManager
-                        session={session}
-                        socket={socket}
-                        currentProductId={session?.currentProduct?._id || session?.currentProduct}
-                        onCurrentProductChange={p => setSession(s => s ? { ...s, currentProduct: p } : s)}
-                      />
-                    )}
-                    {activeTab === 'questions' && (
-                      <QuestionPanel questions={questions} unansweredCount={unansweredCount} onMarkAnswered={handleMarkAnswered} />
-                    )}
-                    {activeTab === 'analytics' && (
-                      <AnalyticsDashboard socket={socket} sessionId={session?._id} reactionCounts={reactionCounts} />
-                    )}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </div>
+          <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 overflow-x-auto">
+            {loading ? (
+              <p className="text-center font-bold">Loading users...</p>
+            ) : (
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b-4 border-black">
+                    <th className="p-3 font-black uppercase tracking-wider">Name</th>
+                    <th className="p-3 font-black uppercase tracking-wider">Email</th>
+                    <th className="p-3 font-black uppercase tracking-wider">Role</th>
+                    <th className="p-3 font-black uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsers.map(u => (
+                    <tr key={u._id} className="border-b-2 border-zinc-200 hover:bg-zoop-yellow/10 transition">
+                      <td className="p-3 font-medium">{u.name}</td>
+                      <td className="p-3">{u.email}</td>
+                      <td className="p-3">
+                        <span className={`inline-block px-2 py-1 text-xs font-bold uppercase rounded border-2 border-black ${
+                          u.role === 'admin' ? 'bg-zoop-yellow text-black' : 
+                          u.role === 'shop_owner' ? 'bg-black text-white' : 
+                          'bg-zinc-200 text-black'
+                        }`}>
+                          {u.role}
+                        </span>
+                      </td>
+                      <td className="p-3 flex gap-2">
+                        <button
+                          onClick={() => openEditModal(u)}
+                          className="px-3 py-1 bg-zinc-100 border-2 border-black font-bold hover:bg-black hover:text-white transition"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(u._id)}
+                          className="px-3 py-1 bg-red-100/50 border-2 border-red-600 text-red-600 font-bold hover:bg-red-600 hover:text-white transition"
+                          disabled={u._id === user?.id} // Prevent self-delete
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredUsers.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="text-center p-8 font-bold">No users found.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>
+
+      {editingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white w-full max-w-md border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative">
+            <button
+              onClick={closeEditModal}
+              className="absolute top-4 right-4 text-black hover:text-red-600 font-black text-xl"
+            >
+              &times;
+            </button>
+            <h2 className="text-2xl font-black uppercase tracking-tighter mb-4 border-b-4 border-black pb-2">Edit User</h2>
+            
+            <form onSubmit={handleUpdate} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-black uppercase mb-1">Name</label>
+                <input
+                  required
+                  type="text"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  className="w-full border-2 border-black p-2 font-medium focus:outline-none focus:ring-2 focus:ring-zoop-yellow bg-zinc-50"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-black uppercase mb-1">Email</label>
+                <input
+                  required
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full border-2 border-black p-2 font-medium focus:outline-none focus:ring-2 focus:ring-zoop-yellow bg-zinc-50"
+                  placeholder="john@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-black uppercase mb-1">Role</label>
+                <select
+                  value={role}
+                  onChange={e => setRole(e.target.value)}
+                  className="w-full border-2 border-black p-2 font-medium focus:outline-none focus:ring-2 focus:ring-zoop-yellow bg-zinc-50 uppercase"
+                >
+                  <option value="buyer">Buyer</option>
+                  <option value="shop_owner">Shop Owner</option>
+                  <option value="admin">Admin / Moderator</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-black uppercase mb-1">New Password <span className="text-xs text-zinc-500 normal-case font-normal">(Leave blank to keep current)</span></label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full border-2 border-black p-2 font-medium focus:outline-none focus:ring-2 focus:ring-zoop-yellow bg-zinc-50"
+                  placeholder="••••••••"
+                  minLength={6}
+                />
+              </div>
+
+              <div className="flex gap-4 mt-4">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="flex-1 py-3 px-4 bg-zinc-200 text-black border-2 border-black font-black uppercase hover:bg-zinc-300 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 px-4 bg-zoop-yellow text-black border-2 border-black font-black uppercase hover:bg-yellow-400 transition"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
