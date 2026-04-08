@@ -8,7 +8,7 @@ const {
 } = require('../controllers/productController');
 const { upload, uploadToCloudinary } = require('../middleware/upload');
 const { validateRequest } = require('../middleware/validateRequest');
-const { verifyRoles } = require('../middleware/verifyAdmin');
+const { optionalAuth, verifyRoles } = require('../middleware/verifyAdmin');
 
 const router = express.Router();
 
@@ -64,6 +64,7 @@ const updateProductValidation = [
 router
   .route('/')
   .get(
+    optionalAuth,
     query('isActive').optional().isBoolean().withMessage('isActive must be a boolean'),
     validateRequest,
     getProducts

@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 const socketHandlers = require('./socket/socketHandlers');
 const { ensureDefaultUsers } = require('./utils/seedDefaultUsers');
+const { syncLegacyProductOwnership } = require('./utils/syncProductOwners');
 
 const app = express();
 const server = http.createServer(app);
@@ -64,6 +65,7 @@ const startServer = async () => {
       process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/live-commerce'
     );
     await ensureDefaultUsers();
+    await syncLegacyProductOwnership();
 
     server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

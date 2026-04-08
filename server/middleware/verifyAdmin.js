@@ -10,6 +10,22 @@ const getTokenFromRequest = (req) => {
   return authorizationHeader.split(' ')[1];
 };
 
+const optionalAuth = (req, _res, next) => {
+  try {
+    const token = getTokenFromRequest(req);
+
+    if (!token) {
+      return next();
+    }
+
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    return next();
+  } catch (error) {
+    req.user = null;
+    return next();
+  }
+};
+
 const requireAuth = (req, res, next) => {
   try {
     const token = getTokenFromRequest(req);
@@ -46,6 +62,7 @@ const verifyAdmin = verifyRoles(['admin']);
 
 module.exports = {
   getTokenFromRequest,
+  optionalAuth,
   requireAuth,
   verifyRoles,
   verifyAdmin,
