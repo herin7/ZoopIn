@@ -19,7 +19,7 @@ const loginUser = async (req, res, next) => {
     const normalizedEmail = email.trim().toLowerCase();
     const user = await User.findOne({ email: normalizedEmail });
 
-    if (!user || (role && user.role !== role)) {
+    if (!user) {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials',
@@ -43,6 +43,13 @@ const loginUser = async (req, res, next) => {
         token,
         user: buildUserPayload(user),
       },
+      meta:
+        role && user.role !== role
+          ? {
+              requestedRole: role,
+              resolvedRole: user.role,
+            }
+          : undefined,
     });
   } catch (error) {
     return next(error);

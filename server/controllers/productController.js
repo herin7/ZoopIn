@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const LiveSession = require('../models/LiveSession');
 
 const parseBoolean = (value) => {
   if (value === undefined) {
@@ -45,6 +46,26 @@ const normalizeImages = (value) => {
   return [];
 };
 
+const buildOwnerFilter = (user) => {
+  if (!user || user.role === 'admin') {
+    return {};
+  }
+
+  if (user.role === 'shop_owner') {
+    return {
+      ownerId: user.id,
+    };
+  }
+
+  return {};
+};
+
+const findManagedProduct = (productId, user) =>
+  Product.findOne({
+    _id: productId,
+    ...buildOwnerFilter(user),
+  });
+
 const createProduct = async (req, res, next) => {
   try {
     const images = req.uploadedImageUrls?.length
@@ -59,6 +80,9 @@ const createProduct = async (req, res, next) => {
       stock: parseNumber(req.body.stock, 0),
       isActive: parseBoolean(req.body.isActive) ?? true,
       images,
+      ownerId: req.user.id,
+      ownerEmail: req.user.email,
+      ownerName: req.user.name,
     });
 
     const createdProduct = await product.save();
@@ -74,7 +98,9 @@ const createProduct = async (req, res, next) => {
 
 const getProducts = async (req, res, next) => {
   try {
-    const filters = {};
+    const filters = {
+      ...buildOwnerFilter(req.user),
+    };
 
     if (req.query.isActive !== undefined) {
       filters.isActive = parseBoolean(req.query.isActive);
@@ -93,7 +119,7 @@ const getProducts = async (req, res, next) => {
 
 const updateProduct = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await findManagedProduct(req.params.id, req.user);
 
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
@@ -131,6 +157,10 @@ const updateProduct = async (req, res, next) => {
       product.images = [...product.images, ...req.uploadedImageUrls];
     }
 
+    product.ownerId = product.ownerId || req.user.id;
+    product.ownerEmail = req.user.email;
+    product.ownerName = req.user.name;
+
     const updatedProduct = await product.save();
 
     return res.json({
@@ -144,11 +174,18 @@ const updateProduct = async (req, res, next) => {
 
 const deleteProduct = async (req, res, next) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await findManagedProduct(req.params.id, req.user);
 
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
+
+    await product.deleteOne();
+    await LiveSession.updateMany(
+      { currentProduct: product._id },
+      { $set: { currentProduct: null } }
+    );
+    await LiveSession.updateMany({}, { $pull: { products: { productId: product._id } } });
 
     return res.json({
       success: true,

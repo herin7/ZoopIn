@@ -445,24 +445,24 @@ module.exports = (io) => {
 
     socket.on('product:switch', async ({ roomId, sessionId, productId } = {}) => {
       try {
-        if (!roomId || !sessionId || !productId) {
-          return emitSocketError(socket, 'roomId, sessionId and productId are required');
+        if (!roomId || !sessionId) {
+          return emitSocketError(socket, 'roomId and sessionId are required');
         }
 
-        const session = await LiveSession.findByIdAndUpdate(
-          sessionId,
-          { currentProduct: productId },
-          { new: true }
-        ).populate('currentProduct');
+        const session = await LiveSession.findById(sessionId);
 
         if (!session) {
           return emitSocketError(socket, 'Session not found');
         }
 
+        session.currentProduct = productId || null;
+        await session.save();
+        await session.populate('currentProduct');
+
         io.to(roomId).emit('product:changed', {
           sessionId,
-          productId,
-          currentProduct: session.currentProduct,
+          productId: productId || null,
+          currentProduct: session.currentProduct || null,
         });
       } catch (error) {
         emitSocketError(socket, error.message || 'Unable to switch product');

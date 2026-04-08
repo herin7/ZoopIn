@@ -1,195 +1,313 @@
-# ⚡ ZoopIn: Hype-Driven Live Commerce
+<p align="center">
+  <img src="client/public/zoopin-logo.png" alt="ZoopIn logo" width="360" />
+</p>
 
-> Drop products. React in real-time. Buy the hype.
+<h1 align="center">ZoopIn</h1>
 
-ZoopIn is a live commerce marketplace where sellers host live video drops and buyers watch, react, and shop: all in real-time. Built on a full MERN stack with WebRTC peer-to-peer streaming and Socket.io for real-time signaling and events. The UI follows a **Neubrutalist** design system: thick black borders, hard offset shadows, and high-contrast `#f4ff00` yellow: designed to create urgency and energy around every product drop.
+<p align="center">
+  Live commerce platform with real-time shopping, seller studios, and WebRTC-powered live sessions.
+</p>
 
----
+<p align="center">
+  <strong>React + Vite</strong> | <strong>Node.js + Express</strong> | <strong>MongoDB</strong> | <strong>Socket.io</strong> | <strong>WebRTC</strong>
+</p>
 
-## Tech Stack
+## Overview
 
-| Layer | Technology |
-|---|---|
-| Frontend | React (Vite), Tailwind CSS, Framer Motion |
-| Backend | Node.js, Express, MongoDB (Mongoose) |
-| Real-time | Socket.io (signaling + events) |
-| Streaming | WebRTC (P2P video, signaled via Socket.io) |
-| Auth | JWT stored in localStorage, managed via Zustand |
-| Media | Cloudinary (product image uploads) |
-| State | Zustand (`authStore.js`) |
-| Design | Neubrutalism: 3px borders, hard shadows, `#f4ff00` palette |
+ZoopIn is a live commerce application where:
 
----
+- buyers browse live sessions, watch streams, react, and explore products
+- shop owners manage their own inventory, create live sessions, and feature products during a stream
+- admins manage platform users and operational workflows
 
-## How It Works
+The project is built as a monorepo with a React frontend in `client/` and an Express + MongoDB backend in `server/`.
 
-ZoopIn has three core flows:
+## Key Features
 
-**Viewer**: Opens the landing page, browses live sessions in a TikTok-style vertical feed, joins a room, watches the P2P stream, sends hype emoji reactions, and submits questions to the host via a slide-up drawer.
+- Real-time live commerce flow with Socket.io signaling and WebRTC streaming
+- Role-based access for `buyer`, `shop_owner`, and `admin`
+- Owner-scoped inventory so each seller manages a separate catalog
+- Full item CRUD in the studio: create, read, update, delete
+- Live product spotlight switching during active sessions
+- Default demo accounts for fast reviewer and interviewer access
+- Neubrutalist UI system across landing, buyer, studio, and admin experiences
 
-**Shop Owner**: Signs in, creates a session, uploads products via Cloudinary, goes live, and switches the featured "Product Spotlight" during the stream. Every product switch is broadcast to all connected viewers instantly via a `product:changed` Socket.io event.
+## Product Roles
 
-**Admin**: Signs in, monitors active sessions, viewer counts, submitted questions, and engagement analytics from the admin control center.
+### Buyer
 
----
+- Browse the catalog and live sessions
+- Join live rooms
+- React and submit questions during a stream
 
-## Video Streaming Architecture
+### Shop Owner
 
-ZoopIn uses a custom WebRTC implementation for low-latency P2P streaming. Here's how the connection is established:
+- Access the studio dashboard
+- Manage only their own inventory
+- Create sessions and switch featured products live
 
-**Phase 1: Signaling via Socket.io**
+### Admin
 
-WebRTC cannot discover peers on its own. ZoopIn uses Socket.io as a signaling layer. The host joins a room and emits `host:join`. The viewer joins and emits `viewer:join`. The host then sends an SDP Offer (session description) and ICE Candidates (network routing info) to the viewer through the socket server.
+- Access the admin dashboard
+- Manage users
+- Access studio functionality when needed
 
-**Phase 2: P2P Media via WebRTC**
+## Architecture
 
-Once the handshake is complete, the video stream travels directly between the host and viewer: bypassing the server entirely. The host accesses camera and mic via `navigator.mediaDevices.getUserMedia` inside the `useWebRTCProducer.js` hook and attaches it to an `RTCPeerConnection`. The viewer receives the stream via the `ontrack` event inside `useWebRTCViewer.js` and renders it to a local `<video>` element.
+### Frontend
 
-**Bandwidth Optimization**
+- React 19
+- Vite
+- Tailwind CSS
+- Framer Motion
+- Zustand
+- Axios
 
-The `LiveFeed` component only creates a socket and WebRTC connection for the currently active slide. Scrolling past a session tears down the connection — saving bandwidth and keeping performance clean.
+### Backend
 
----
+- Node.js
+- Express
+- MongoDB with Mongoose
+- JSON Web Tokens for auth
+- Socket.io for real-time events
+- Cloudinary for product image uploads
 
-## Routes
+### Real-Time Layer
 
-| Route | Description |
-|---|---|
-| `/` | Landing page: live session discovery, live previews, how-to-use guide |
-| `/live/:roomId` | Viewer room: P2P stream, hype reactions, question drawer |
-| `/login` | Role-aware login: redirects to correct dashboard based on role |
-| `/studio` | Shop owner control center: products, session controls, product switching |
-| `/admin` | Admin dashboard: sessions, questions, analytics |
+ZoopIn uses:
 
----
+- Socket.io for room presence, reactions, questions, analytics, and WebRTC signaling
+- WebRTC for direct host-to-viewer media streaming
 
-## Auth & Roles
+In practice, the socket server handles coordination while the actual media stream is transferred peer-to-peer.
 
-Two roles exist in the system: `shop_owner` and `buyer`. Role-based navigation is handled via `authRoutes.js`, which redirects users to the correct dashboard on login. JWT tokens are stored in `localStorage` and passed as headers on all API requests. Session state is persisted client-side via Zustand.
+## Current Workflow
 
----
+### Inventory
 
-## Project Structure
+- Products are stored in MongoDB
+- Each product is linked to a specific shop owner
+- Shop owners only see and manage their own inventory
+- Buyers see active products in the public catalog
 
-```
+### Sessions
+
+- A shop owner or admin creates a session
+- A host starts the live session
+- Viewers join by room ID
+- The host can switch the spotlighted product at any time
+- Product changes are broadcast to all connected viewers instantly
+
+### Auth
+
+- Auth is handled with JWTs
+- The frontend persists auth state in `sessionStorage`
+- Protected routes redirect users by role
+- Demo credentials are prefilled in login and register screens for quick access
+
+## Repository Structure
+
+```text
 ZoopIn/
-├── client/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── admin/          # Tools for sellers: Dashboard, Stream Controls
-│   │   │   └── viewer/         # Tools for buyers: Reactions, Spotlight, Feed Slides
-│   │   ├── hooks/
-│   │   │   ├── useWebRTCProducer.js   # Host camera + peer connection logic
-│   │   │   ├── useWebRTCViewer.js     # Viewer stream receive logic
-│   │   │   ├── useReactions.js        # Floating emoji reaction engine
-│   │   │   └── useSocket.js           # Socket.io connection management
-│   │   └── store/
-│   │       └── authStore.js    # Zustand: user session + role state
-│   └── vercel.json             # SPA rewrite rules for Vercel deployment
-└── server/
-    └── ...                     # Express API + Socket.io server
+|-- client/
+|   |-- public/
+|   |-- src/
+|   |   |-- components/
+|   |   |-- hooks/
+|   |   |-- pages/
+|   |   |-- services/
+|   |   `-- store/
+|   |-- package.json
+|   `-- vite.config.js
+|-- server/
+|   |-- controllers/
+|   |-- middleware/
+|   |-- models/
+|   |-- routes/
+|   |-- socket/
+|   |-- utils/
+|   |-- package.json
+|   `-- server.js
+|-- package.json
+|-- Procfile
+`-- README.md
 ```
 
----
+## Getting Started
 
-## Local Setup
+### 1. Install dependencies
 
-**Step 1: Install all dependencies**
+From the repository root:
 
 ```bash
 npm run install-all
 ```
 
-This installs dependencies for both `client/` and `server/` from the root.
+### 2. Configure environment variables
 
-**Step 2: Configure environment variables**
+Create:
 
-Create `server/.env` and `client/.env` using the variables listed in the section below. Fill in your MongoDB URI, Cloudinary credentials, JWT secret, and account credentials.
+- `server/.env`
+- `client/.env`
 
-**Step 3: Start the dev server**
+You can copy the values from:
+
+- `server/.env.example`
+- `client/.env.example`
+
+### 3. Start the app in development
 
 ```bash
 npm run dev
 ```
 
-This runs both the Express backend and the Vite frontend concurrently.
+This runs:
 
----
+- the backend on port `5000` by default
+- the Vite frontend on port `5173` by default
 
 ## Environment Variables
 
-### server/.env
+### Server
+
+Example values:
 
 ```env
-PORT=
-MONGODB_URI=
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/live-commerce
 MONGO_URI=
-JWT_SECRET=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-ADMIN_EMAIL=
-ADMIN_PASSWORD=
-SHOP_OWNER_EMAIL=
-SHOP_OWNER_PASSWORD=
-CLIENT_URL=
-NODE_ENV=
+JWT_SECRET=your_jwt_secret_here
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+ADMIN_NAME=Platform Admin
+ADMIN_EMAIL=demo@admin.com
+ADMIN_PASSWORD=demo123
+SHOP_OWNER_NAME=Demo Shop Owner
+SHOP_OWNER_EMAIL=demo@owner.com
+SHOP_OWNER_PASSWORD=demo123
+BUYER_NAME=Demo Buyer
+BUYER_EMAIL=demo@buyer.com
+BUYER_PASSWORD=demo123
+CLIENT_URL=http://localhost:5173
+NODE_ENV=development
 ```
 
-`ADMIN_PASSWORD` and `SHOP_OWNER_PASSWORD` must be bcrypt hashes: not plain text strings.
+Notes:
 
-### client/.env
+- `MONGODB_URI` is the primary Mongo connection setting
+- `MONGO_URI` is also supported as a fallback
+- `CLIENT_URL` can contain one or more comma-separated allowed frontend origins
+- default accounts are automatically seeded on startup
+
+### Client
 
 ```env
-VITE_API_URL=
-VITE_SOCKET_URL=
+VITE_API_URL=http://localhost:5000
+VITE_SOCKET_URL=http://localhost:5000
 ```
 
-Both should point to your backend server URL (e.g., `http://localhost:5000` in development).
+## Demo Accounts
 
----
-
-## Default Dev Accounts
-
-These are pre-configured accounts for local development. Do **not** use these in production.
+These defaults are intended for development, demos, and interviews only.
 
 | Role | Email | Password |
-|---|---|---|
-| Admin | admin@example.com | admin123 |
-| Shop Owner | owner@example.com | admin123 |
+| --- | --- | --- |
+| Buyer | `demo@buyer.com` | `demo123` |
+| Shop Owner | `demo@owner.com` | `demo123` |
+| Admin | `demo@admin.com` | `demo123` |
 
-> ⚠️ Change all credentials before any real deployment. Passwords are stored as bcrypt hashes inside `server/.env`: update them there directly.
+Important:
 
----
+- change all credentials before any real deployment
+- change `JWT_SECRET` in every environment
+- use strong production values for all account passwords
+
+## Available Scripts
+
+### Root
+
+```bash
+npm run dev
+npm run server
+npm run client
+npm run install-all
+```
+
+### Client
+
+```bash
+npm run dev --prefix client
+npm run build --prefix client
+npm run lint --prefix client
+```
+
+### Server
+
+```bash
+npm start --prefix server
+npm run dev --prefix server
+```
 
 ## Deployment
 
-**Backend**: The `Procfile` at the root defines the start command. Deploy to Railway, Render, or Heroku. Set all `server/.env` variables in your platform's environment config. Set `CLIENT_URL` to your deployed frontend URL to configure CORS correctly.
+### Backend
 
-**Frontend**: `client/vercel.json` handles SPA fallback rewrites so all routes resolve to `index.html`. Deploy the `client/` directory to Vercel. Set `VITE_API_URL` and `VITE_SOCKET_URL` to your deployed backend URL.
+The production start command is defined in `Procfile`:
 
----
+```text
+web: node server/server.js
+```
 
-## Session Lifecycle
+Deploy the backend to a Node-compatible host such as Railway, Render, or Heroku-compatible infrastructure.
 
-A session goes through three states: `Pending` (created, not yet live) → `Live` (actively streaming) → `Ended` (archived). During a live session, the host can switch the active product. This emits a `product:changed` Socket.io event which causes the `ProductSpotlight` component to update instantly for every connected viewer.
+Set all required server environment variables, especially:
 
----
+- `MONGODB_URI`
+- `JWT_SECRET`
+- `CLIENT_URL`
+- Cloudinary credentials
 
-## Design System
+### Frontend
 
-ZoopIn uses a **Neubrutalist** design system across all components.
+Deploy the `client/` app separately, for example to Vercel.
 
-- **Borders**: Thick `3px` or `4px` solid black borders on all interactive elements
-- **Shadows**: Hard, non-blurred box shadows (e.g., `8px 8px 0px 0px rgba(0,0,0,1)`)
-- **Typography**: Spline Sans, `font-black`, heavy use of `italic` and `uppercase`
-- **Colors**: Zoop Yellow `#f4ff00`, Pure Black `#000000`, Pure White `#FFFFFF`, Live Red `#dc2626`
-- **Notifications**: Custom Neubrutalist toast system (`ToastContainer.jsx`) wired to a global Zustand store
+Set:
 
-Every interaction: questions, product switches, viewer reactions: is treated as a "Signal" to reinforce the high-energy, real-time aesthetic.
+- `VITE_API_URL`
+- `VITE_SOCKET_URL`
 
----
+Both should point to the deployed backend base URL.
 
-## Current Scope
+## Operational Notes
 
-ZoopIn is optimized for a minimal, functional live commerce workflow. Auth uses env-configured accounts instead of a full user registration system. The streaming model is one host broadcasting to many viewers via P2P. The product catalog, sessions, and all analytics are tied to the configured shop owner account.
+### Inventory Ownership Migration
+
+The backend now includes logic to assign legacy ownerless products to the only shop owner in the database when that situation is unambiguous. This helps older local data keep working after the owner-scoped inventory update.
+
+### Auth Behavior
+
+Login is more resilient for seeded demo accounts:
+
+- the UI prefills demo credentials by role
+- register can fall back to sign-in if a demo account already exists
+- login redirects using the actual authenticated role returned by the server
+
+## Design Direction
+
+ZoopIn uses a bold, high-contrast visual language:
+
+- thick black borders
+- hard offset shadows
+- energetic motion
+- bright accent colors
+- live-commerce urgency in typography and layout
+
+## Known Development Notes
+
+- `npm run build --prefix client` should produce a production bundle successfully
+- the client lint baseline may still include unrelated pre-existing warnings or errors outside the latest feature work
+
+## License
+
+This project currently does not include a dedicated license file. Add one before public distribution if needed.
