@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-d
 import CartPage from './pages/CartPage';
 import AdminRoute from './components/AdminRoute';
 import AdminDashboard from './pages/AdminDashboard';
+import StudioDashboard from './pages/StudioDashboard';
 import BuyerDashboard from './pages/BuyerDashboard';
 import LandingPage from './pages/LandingPage';
 import LiveFeed from './pages/LiveFeed';
@@ -40,7 +41,7 @@ function App() {
           path="/studio"
           element={
             <AdminRoute allowedRoles={['shop_owner', 'admin']}>
-              <AdminDashboard />
+              <StudioDashboard />
             </AdminRoute>
           }
         />
